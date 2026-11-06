@@ -1,0 +1,22 @@
+namespace: mofi-dev
+
+mysql:
+  database: qshelter-dev
+  rootPassword: mofi_local_root
+  nodePort: 30307
+
+redis:
+  nodePort: 30637
+
+minio:
+  bucket: mofi-local
+  apiNodePort: 30900
+  consoleNodePort: 30901
+
+rabbitmq:
+  amqpNodePort: 30567
+  mgmtNodePort: 31567
+
+platform:
+  nodePort: 30080
+  jwtSecret: local-dev-secret

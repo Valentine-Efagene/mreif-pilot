@@ -1,0 +1,20 @@
+{{- if .Values.platform.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: platform-edge
+  namespace: {{ .Values.namespace }}
+  labels:
+    {{- include "mofi-local.labels" . | nindent 4 }}
+    app.kubernetes.io/component: platform
+spec:
+  type: NodePort
+  selector:
+    app.kubernetes.io/component: platform
+    {{- include "mofi-local.selectorLabels" . | nindent 4 }}
+  ports:
+    - name: edge-http
+      port: 8080
+      targetPort: edge-http
+      nodePort: {{ .Values.platform.nodePort }}
+{{- end }}

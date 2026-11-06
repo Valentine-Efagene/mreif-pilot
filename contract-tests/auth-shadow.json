@@ -1,0 +1,41 @@
+[
+  {
+    "name": "health public",
+    "method": "GET",
+    "path": "/health",
+    "expectStatus": 200
+  },
+  {
+    "name": "cooperative names public",
+    "method": "GET",
+    "path": "/cooperative/cooperatives/names",
+    "expectStatus": 200
+  },
+  {
+    "name": "cooperative login public",
+    "method": "POST",
+    "path": "/cooperative/auth/login",
+    "headers": { "Content-Type": "application/json" },
+    "expectStatus": 401
+  },
+  {
+    "name": "protected route missing auth",
+    "method": "GET",
+    "path": "/agent/agents/1",
+    "expectStatus": 401
+  },
+  {
+    "name": "protected route malformed auth",
+    "method": "GET",
+    "path": "/pmb/pmbs/1",
+    "headers": { "Authorization": "NotBearer token" },
+    "expectStatus": 401
+  },
+  {
+    "name": "protected route invalid jwt",
+    "method": "GET",
+    "path": "/rsa/rsas/1",
+    "headers": { "Authorization": "Bearer not-a-valid-jwt" },
+    "expectStatus": 401
+  }
+]

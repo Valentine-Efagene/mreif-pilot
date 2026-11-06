@@ -1,0 +1,12 @@
+export enum PresellCommitmentEvidence {
+  DEPOSIT = 'DEPOSIT',
+  BINDING_PRESALE_AGREEMENT = 'BINDING_PRESALE_AGREEMENT',
+  COOPERATIVE_MEMBERSHIP = 'COOPERATIVE_MEMBERSHIP',
+  OTHERS = 'OTHERS',
+}
+
+export enum ProposedDevelopmentApprovalStatus {
+  APPROVED = 'APPROVED',
+  DECLINED = 'DECLINED',
+  PENDING = 'PENDING',
+}

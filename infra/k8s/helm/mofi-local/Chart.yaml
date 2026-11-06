@@ -1,0 +1,6 @@
+apiVersion: v2
+name: mofi-local
+description: Local kind stack for MOFI Platform API (data services + multicontainer platform Pod)
+type: application
+version: 0.1.0
+appVersion: "0.1.0"

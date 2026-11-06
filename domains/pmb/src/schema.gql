@@ -1,0 +1,146 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+"""user"""
+type User {
+  id: Int!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  deletedAt: DateTime!
+  firstName: String
+  lastName: String
+  phone: String
+  email: String
+  password: String
+  emailVerified: Boolean!
+  bvn: String
+  avatar: String
+  gender: String
+  dob: String
+  country: String
+  isFirstTimeLogin: Boolean!
+  bvnVerified: Boolean!
+  identityDocument: String
+  identityDocument_verified: Boolean!
+  employmentStatus: String
+  monthlyNetSalary: String
+  isNhfActive: Boolean!
+  pfa: String
+  rsa: String
+  roles: [UserRole!]!
+  businessSector: String
+  yearsOfWork: Float
+  suspended: Boolean!
+}
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
+enum UserRole {
+  ADMIN
+  DEVELOPER
+  SALES_ADMIN
+  FINANCE_ADMIN
+  SUPER_ADMIN
+}
+
+type PaginatedUsers {
+  total: Float!
+  totalPages: Float!
+  currentPage: Float!
+  data: [User!]!
+}
+
+""""""
+type EmploymentHistory {
+  id: Int!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  deletedAt: DateTime!
+  employee: Employee!
+  employeeId: Int!
+  employer: Employer!
+  employerId: Int!
+}
+
+"""Employer Model"""
+type Employer {
+  id: Int!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  deletedAt: DateTime!
+  user: User!
+  userId: Int!
+  employerNumber: String
+  name: String
+  isRegistered: Boolean
+  nPaidNigerianEmployees: Int
+  taxId: String
+  nhfNumber: String
+  headOfficeAddress: String
+  postalAddress: String
+  houseNumber: String
+  city: String
+  state: String
+  mobile: String
+  phone: String
+  email: String
+  website: String
+  employees: [Employee!]!
+  industry: Industry!
+  employmentHistory: [EmploymentHistory!]!
+}
+
+enum Industry {
+  FINANCE
+  REAL_ESTATE
+}
+
+"""Employee Model"""
+type Employee {
+  id: Int!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  deletedAt: DateTime!
+  user: User!
+  employerId: Int!
+  name: String
+  nhfNumber: String
+  employer: Employer!
+  employmentHistory: [EmploymentHistory!]!
+}
+
+type PaginatedEmploymentHistory {
+  total: Float!
+  totalPages: Float!
+  currentPage: Float!
+  data: [EmploymentHistory!]!
+}
+
+type PaginatedEmployees {
+  total: Float!
+  totalPages: Float!
+  currentPage: Float!
+  data: [Employee!]!
+}
+
+type PaginatedEmployers {
+  total: Float!
+  totalPages: Float!
+  currentPage: Float!
+  data: [Employer!]!
+}
+
+type Query {
+  employment(id: Int!): EmploymentHistory!
+  employmentHistory(limit: Int, page: Int): PaginatedEmploymentHistory!
+  employee(id: Int!): Employee!
+  employees(limit: Int, page: Int): PaginatedEmployees!
+  employer(id: Int!): Employer!
+  employers(limit: Int, page: Int): PaginatedEmployers!
+  user(id: Int!): User!
+  users(limit: Int, page: Int): PaginatedUsers!
+}

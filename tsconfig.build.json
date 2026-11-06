@@ -1,0 +1,4 @@
+{
+  "extends": "./tsconfig.json",
+  "exclude": ["node_modules", "dist", "infra", "contract-tests", "**/*spec.ts", "**/DataEntry*.ts", "**/DataEntryHelper.ts", "**/LambdaInvoker.ts", "**/LambdaHelper.ts", "**/LambdaUtil.ts"]
+}

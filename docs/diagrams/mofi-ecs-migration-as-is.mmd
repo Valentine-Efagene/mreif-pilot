@@ -1,0 +1,33 @@
+flowchart TB
+  Clients["Clients (Admin SPA, MOFI apps)"]
+  APIGW["API Gateway HTTP API\nCustom domain + base paths"]
+  Agent["Lambda — agent"]
+  PMB["Lambda — PMB"]
+  RSA["Lambda — RSA"]
+  Dev["Lambda — developer"]
+  Up["Lambda — uploader"]
+  Coop["Lambda — cooperative"]
+  Auth["Authorizer Lambda (JWT)"]
+  MySQL[(MySQL RDS — existing)]
+  S3[(S3 bucket — existing)]
+  Notify["Notification service\n(HTTP, async)"]
+
+  Clients -->|HTTPS| APIGW
+  APIGW --> Agent
+  APIGW --> PMB
+  APIGW --> RSA
+  APIGW --> Dev
+  APIGW --> Up
+  APIGW --> Coop
+  APIGW --> Auth
+  Agent --> MySQL
+  PMB --> MySQL
+  RSA --> MySQL
+  Dev --> MySQL
+  Up --> MySQL
+  Coop --> MySQL
+  Agent --> S3
+  Up --> S3
+  Coop --> S3
+  Agent --> Notify
+  PMB --> Notify

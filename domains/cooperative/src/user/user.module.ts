@@ -1,0 +1,13 @@
+import { Module } from '@nestjs/common';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { User } from './user.entity';
+import { UserService } from './user.service';
+import { UserController } from './user.controller';
+
+@Module({
+  imports: [TypeOrmModule.forFeature([User], 'cooperative')],
+  providers: [UserService],
+  exports: [UserService],
+  controllers: process.env.DB_HOST === 'localhost' ? [UserController] : [],
+})
+export class UserModule { }

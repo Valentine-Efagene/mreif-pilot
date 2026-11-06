@@ -1,0 +1,85 @@
+namespace: mofi-dev
+
+mysql:
+  image: mysql:8.0
+  database: qshelter-dev
+  rootPassword: mofi_local_root
+  nodePort: 30307
+  storage: 2Gi
+
+redis:
+  image: redis:7-alpine
+  nodePort: 30637
+
+minio:
+  image: minio/minio:latest
+  mcImage: minio/mc:latest
+  rootUser: minioadmin
+  rootPassword: minioadmin
+  bucket: mofi-local
+  apiNodePort: 30900
+  consoleNodePort: 30901
+
+rabbitmq:
+  image: rabbitmq:3.13-management-alpine
+  username: mofi
+  password: mofi
+  vhost: mofi
+  amqpNodePort: 30567
+  mgmtNodePort: 31567
+
+platform:
+  enabled: true
+  image: mofi-platform-api:local
+  nodePort: 30080
+  jwtSecret: local-dev-secret
+  notificationUrl: https://api.qshelter.ng/testnotify/email
+  roles:
+    - containerName: edge
+      mofiRole: edge
+      port: 8080
+      runtime: edge
+      workerQueues: none
+      healthPath: /health
+    - containerName: agent
+      mofiRole: agent
+      port: 3001
+      runtime: domain
+      workerQueues: none
+      healthPath: /agent/health
+    - containerName: pmb
+      mofiRole: pmb
+      port: 3002
+      runtime: domain
+      workerQueues: none
+      healthPath: /pmb/health
+    - containerName: rsa
+      mofiRole: rsa
+      port: 3003
+      runtime: domain
+      workerQueues: none
+      healthPath: /rsa/health
+    - containerName: developer
+      mofiRole: developer
+      port: 3004
+      runtime: domain
+      workerQueues: none
+      healthPath: /developer/health
+    - containerName: uploader
+      mofiRole: uploader
+      port: 3005
+      runtime: domain
+      workerQueues: none
+      healthPath: /uploader/health
+    - containerName: cooperative
+      mofiRole: cooperative
+      port: 3006
+      runtime: domain
+      workerQueues: none
+      healthPath: /cooperative/health
+    - containerName: worker
+      mofiRole: worker
+      port: 3007
+      runtime: worker
+      workerQueues: all
+      healthPath: /health

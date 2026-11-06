@@ -1,0 +1,21 @@
+flowchart TB
+  Clients["Clients (unchanged URLs / paths)"]
+  Route["API Gateway / DNS (strangler)\nPilot paths → ALB\nOther paths → Lambdas"]
+  ALB["Application Load Balancer\nHealth: GET /health"]
+  ECS["ECS Fargate — MOFI Platform API\nIn-process JWT + user guard"]
+  Legacy["Legacy Lambdas\n(non-pilot paths)"]
+  MySQL[(MySQL — existing)]
+  S3[(S3 — existing)]
+  Redis[(Redis — ElastiCache, new)]
+  Notify["Notification HTTP\n(unchanged)"]
+
+  Clients --> Route
+  Route --> ALB
+  Route --> Legacy
+  ALB --> ECS
+  ECS --> MySQL
+  ECS --> S3
+  ECS --> Redis
+  ECS --> Notify
+  Legacy --> MySQL
+  Legacy --> S3

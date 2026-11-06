@@ -1,0 +1,33 @@
+{{- if .Values.platform.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: platform-config
+  namespace: {{ .Values.namespace }}
+  labels:
+    {{- include "mofi-local.labels" . | nindent 4 }}
+    app.kubernetes.io/component: platform
+data:
+  NODE_ENV: development
+  AUTH_ENFORCEMENT: local
+  MESSAGING_ENABLED: "true"
+  NOTIFICATION_MODE: async
+  LAMBDA_INVOKE_MODE: async
+  DB_HOST: {{ include "mofi-local.mysqlHost" . | quote }}
+  DB_PORT: "3306"
+  DB_USERNAME: root
+  DB_NAME: {{ .Values.mysql.database | quote }}
+  REDIS_PORT: "6379"
+  CUSTOM_AWS_S3_BUCKET_NAME: {{ .Values.minio.bucket | quote }}
+  CUSTOM_AWS_ACCESS_KEY_ID: {{ .Values.minio.rootUser | quote }}
+  CUSTOM_AWS_REGION: us-east-1
+  CUSTOM_AWS_ENDPOINT: http://{{ include "mofi-local.minioHost" . }}:9000
+  CUSTOM_AWS_FORCE_PATH_STYLE: "true"
+  PRESIGNED_URL_TTL: "3600"
+  NOTIFICATION_URL: {{ .Values.platform.notificationUrl | quote }}
+  AMQP_HOST: {{ include "mofi-local.rabbitmqHost" . | quote }}
+  AMQP_PORT: "5672"
+  AMQP_USERNAME: {{ .Values.rabbitmq.username | quote }}
+  AMQP_VHOST: {{ .Values.rabbitmq.vhost | quote }}
+  AMQP_URL: amqp://{{ .Values.rabbitmq.username }}:{{ .Values.rabbitmq.password }}@{{ include "mofi-local.rabbitmqHost" . }}:5672/{{ .Values.rabbitmq.vhost }}
+{{- end }}
