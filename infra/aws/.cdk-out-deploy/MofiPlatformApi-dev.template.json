@@ -1,0 +1,2719 @@
+{
+ "Description": "MOFI pilot ECS monolith — Fargate + ALB + ECR",
+ "Resources": {
+  "Vpc8378EB38": {
+   "Type": "AWS::EC2::VPC",
+   "Properties": {
+    "CidrBlock": "10.0.0.0/16",
+    "EnableDnsHostnames": true,
+    "EnableDnsSupport": true,
+    "InstanceTenancy": "default",
+    "Tags": [
+     {
+      "Key": "Name",
+      "Value": "MofiPlatformApi-dev/Vpc"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "MofiPlatformApi-dev/Vpc/Resource"
+   }
+  },
+  "VpcPublicSubnet1Subnet5C2D37C4": {
+   "Type": "AWS::EC2::Subnet",
+   "Properties": {
+    "AvailabilityZone": "us-east-1a",
+    "CidrBlock": "10.0.0.0/18",
+    "MapPublicIpOnLaunch": true,
+    "Tags": [
+     {
+      "Key": "aws-cdk:subnet-name",
+      "Value": "Public"
+     },
+     {
+      "Key": "aws-cdk:subnet-type",
+      "Value": "Public"
+     },
+     {
+      "Key": "Name",
+      "Value": "MofiPlatformApi-dev/Vpc/PublicSubnet1"
+     }
+    ],
+    "VpcId": {
+     "Ref": "Vpc8378EB38"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "MofiPlatformApi-dev/Vpc/PublicSubnet1/Subnet"
+   }
+  },
+  "VpcPublicSubnet1RouteTable6C95E38E": {
+   "Type": "AWS::EC2::RouteTable",
+   "Properties": {
+    "Tags": [
+     {
+      "Key": "Name",
+      "Value": "MofiPlatformApi-dev/Vpc/PublicSubnet1"
+     }
+    ],
+    "VpcId": {
+     "Ref": "Vpc8378EB38"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "MofiPlatformApi-dev/Vpc/PublicSubnet1/RouteTable"
+   }
+  },
+  "VpcPublicSubnet1RouteTableAssociation97140677": {
+   "Type": "AWS::EC2::SubnetRouteTableAssociation",
+   "Properties": {
+    "RouteTableId": {
+     "Ref": "VpcPublicSubnet1RouteTable6C95E38E"
+    },
+    "SubnetId": {
+     "Ref": "VpcPublicSubnet1Subnet5C2D37C4"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "MofiPlatformApi-dev/Vpc/PublicSubnet1/RouteTableAssociation"
+   }
+  },
+  "VpcPublicSubnet1DefaultRoute3DA9E72A": {
+   "Type": "AWS::EC2::Route",
+   "Properties": {
+    "DestinationCidrBlock": "0.0.0.0/0",
+    "GatewayId": {
+     "Ref": "VpcIGWD7BA715C"
+    },
+    "RouteTableId": {
+     "Ref": "VpcPublicSubnet1RouteTable6C95E38E"
+    }
+   },
+   "DependsOn": [
+    "VpcVPCGWBF912B6E"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "MofiPlatformApi-dev/Vpc/PublicSubnet1/DefaultRoute"
+   }
+  },
+  "VpcPublicSubnet1EIPD7E02669": {
+   "Type": "AWS::EC2::EIP",
+   "Properties": {
+    "Domain": "vpc",
+    "Tags": [
+     {
+      "Key": "Name",
+      "Value": "MofiPlatformApi-dev/Vpc/PublicSubnet1"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "MofiPlatformApi-dev/Vpc/PublicSubnet1/EIP"
+   }
+  },
+  "VpcPublicSubnet1NATGateway4D7517AA": {
+   "Type": "AWS::EC2::NatGateway",
+   "Properties": {
+    "AllocationId": {
+     "Fn::GetAtt": [
+      "VpcPublicSubnet1EIPD7E02669",
+      "AllocationId"
+     ]
+    },
+    "SubnetId": {
+     "Ref": "VpcPublicSubnet1Subnet5C2D37C4"
+    },
+    "Tags": [
+     {
+      "Key": "Name",
+      "Value": "MofiPlatformApi-dev/Vpc/PublicSubnet1"
+     }
+    ]
+   },
+   "DependsOn": [
+    "VpcPublicSubnet1DefaultRoute3DA9E72A",
+    "VpcPublicSubnet1RouteTableAssociation97140677"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "MofiPlatformApi-dev/Vpc/PublicSubnet1/NATGateway"
+   }
+  },
+  "VpcPublicSubnet2Subnet691E08A3": {
+   "Type": "AWS::EC2::Subnet",
+   "Properties": {
+    "AvailabilityZone": "us-east-1b",
+    "CidrBlock": "10.0.64.0/18",
+    "MapPublicIpOnLaunch": true,
+    "Tags": [
+     {
+      "Key": "aws-cdk:subnet-name",
+      "Value": "Public"
+     },
+     {
+      "Key": "aws-cdk:subnet-type",
+      "Value": "Public"
+     },
+     {
+      "Key": "Name",
+      "Value": "MofiPlatformApi-dev/Vpc/PublicSubnet2"
+     }
+    ],
+    "VpcId": {
+     "Ref": "Vpc8378EB38"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "MofiPlatformApi-dev/Vpc/PublicSubnet2/Subnet"
+   }
+  },
+  "VpcPublicSubnet2RouteTable94F7E489": {
+   "Type": "AWS::EC2::RouteTable",
+   "Properties": {
+    "Tags": [
+     {
+      "Key": "Name",
+      "Value": "MofiPlatformApi-dev/Vpc/PublicSubnet2"
+     }
+    ],
+    "VpcId": {
+     "Ref": "Vpc8378EB38"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "MofiPlatformApi-dev/Vpc/PublicSubnet2/RouteTable"
+   }
+  },
+  "VpcPublicSubnet2RouteTableAssociationDD5762D8": {
+   "Type": "AWS::EC2::SubnetRouteTableAssociation",
+   "Properties": {
+    "RouteTableId": {
+     "Ref": "VpcPublicSubnet2RouteTable94F7E489"
+    },
+    "SubnetId": {
+     "Ref": "VpcPublicSubnet2Subnet691E08A3"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "MofiPlatformApi-dev/Vpc/PublicSubnet2/RouteTableAssociation"
+   }
+  },
+  "VpcPublicSubnet2DefaultRoute97F91067": {
+   "Type": "AWS::EC2::Route",
+   "Properties": {
+    "DestinationCidrBlock": "0.0.0.0/0",
+    "GatewayId": {
+     "Ref": "VpcIGWD7BA715C"
+    },
+    "RouteTableId": {
+     "Ref": "VpcPublicSubnet2RouteTable94F7E489"
+    }
+   },
+   "DependsOn": [
+    "VpcVPCGWBF912B6E"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "MofiPlatformApi-dev/Vpc/PublicSubnet2/DefaultRoute"
+   }
+  },
+  "VpcPrivateSubnet1Subnet536B997A": {
+   "Type": "AWS::EC2::Subnet",
+   "Properties": {
+    "AvailabilityZone": "us-east-1a",
+    "CidrBlock": "10.0.128.0/18",
+    "MapPublicIpOnLaunch": false,
+    "Tags": [
+     {
+      "Key": "aws-cdk:subnet-name",
+      "Value": "Private"
+     },
+     {
+      "Key": "aws-cdk:subnet-type",
+      "Value": "Private"
+     },
+     {
+      "Key": "Name",
+      "Value": "MofiPlatformApi-dev/Vpc/PrivateSubnet1"
+     }
+    ],
+    "VpcId": {
+     "Ref": "Vpc8378EB38"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "MofiPlatformApi-dev/Vpc/PrivateSubnet1/Subnet"
+   }
+  },
+  "VpcPrivateSubnet1RouteTableB2C5B500": {
+   "Type": "AWS::EC2::RouteTable",
+   "Properties": {
+    "Tags": [
+     {
+      "Key": "Name",
+      "Value": "MofiPlatformApi-dev/Vpc/PrivateSubnet1"
+     }
+    ],
+    "VpcId": {
+     "Ref": "Vpc8378EB38"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "MofiPlatformApi-dev/Vpc/PrivateSubnet1/RouteTable"
+   }
+  },
+  "VpcPrivateSubnet1RouteTableAssociation70C59FA6": {
+   "Type": "AWS::EC2::SubnetRouteTableAssociation",
+   "Properties": {
+    "RouteTableId": {
+     "Ref": "VpcPrivateSubnet1RouteTableB2C5B500"
+    },
+    "SubnetId": {
+     "Ref": "VpcPrivateSubnet1Subnet536B997A"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "MofiPlatformApi-dev/Vpc/PrivateSubnet1/RouteTableAssociation"
+   }
+  },
+  "VpcPrivateSubnet1DefaultRouteBE02A9ED": {
+   "Type": "AWS::EC2::Route",
+   "Properties": {
+    "DestinationCidrBlock": "0.0.0.0/0",
+    "NatGatewayId": {
+     "Ref": "VpcPublicSubnet1NATGateway4D7517AA"
+    },
+    "RouteTableId": {
+     "Ref": "VpcPrivateSubnet1RouteTableB2C5B500"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "MofiPlatformApi-dev/Vpc/PrivateSubnet1/DefaultRoute"
+   }
+  },
+  "VpcPrivateSubnet2Subnet3788AAA1": {
+   "Type": "AWS::EC2::Subnet",
+   "Properties": {
+    "AvailabilityZone": "us-east-1b",
+    "CidrBlock": "10.0.192.0/18",
+    "MapPublicIpOnLaunch": false,
+    "Tags": [
+     {
+      "Key": "aws-cdk:subnet-name",
+      "Value": "Private"
+     },
+     {
+      "Key": "aws-cdk:subnet-type",
+      "Value": "Private"
+     },
+     {
+      "Key": "Name",
+      "Value": "MofiPlatformApi-dev/Vpc/PrivateSubnet2"
+     }
+    ],
+    "VpcId": {
+     "Ref": "Vpc8378EB38"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "MofiPlatformApi-dev/Vpc/PrivateSubnet2/Subnet"
+   }
+  },
+  "VpcPrivateSubnet2RouteTableA678073B": {
+   "Type": "AWS::EC2::RouteTable",
+   "Properties": {
+    "Tags": [
+     {
+      "Key": "Name",
+      "Value": "MofiPlatformApi-dev/Vpc/PrivateSubnet2"
+     }
+    ],
+    "VpcId": {
+     "Ref": "Vpc8378EB38"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "MofiPlatformApi-dev/Vpc/PrivateSubnet2/RouteTable"
+   }
+  },
+  "VpcPrivateSubnet2RouteTableAssociationA89CAD56": {
+   "Type": "AWS::EC2::SubnetRouteTableAssociation",
+   "Properties": {
+    "RouteTableId": {
+     "Ref": "VpcPrivateSubnet2RouteTableA678073B"
+    },
+    "SubnetId": {
+     "Ref": "VpcPrivateSubnet2Subnet3788AAA1"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "MofiPlatformApi-dev/Vpc/PrivateSubnet2/RouteTableAssociation"
+   }
+  },
+  "VpcPrivateSubnet2DefaultRoute060D2087": {
+   "Type": "AWS::EC2::Route",
+   "Properties": {
+    "DestinationCidrBlock": "0.0.0.0/0",
+    "NatGatewayId": {
+     "Ref": "VpcPublicSubnet1NATGateway4D7517AA"
+    },
+    "RouteTableId": {
+     "Ref": "VpcPrivateSubnet2RouteTableA678073B"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "MofiPlatformApi-dev/Vpc/PrivateSubnet2/DefaultRoute"
+   }
+  },
+  "VpcIGWD7BA715C": {
+   "Type": "AWS::EC2::InternetGateway",
+   "Properties": {
+    "Tags": [
+     {
+      "Key": "Name",
+      "Value": "MofiPlatformApi-dev/Vpc"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "MofiPlatformApi-dev/Vpc/IGW"
+   }
+  },
+  "VpcVPCGWBF912B6E": {
+   "Type": "AWS::EC2::VPCGatewayAttachment",
+   "Properties": {
+    "InternetGatewayId": {
+     "Ref": "VpcIGWD7BA715C"
+    },
+    "VpcId": {
+     "Ref": "Vpc8378EB38"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "MofiPlatformApi-dev/Vpc/VPCGW"
+   }
+  },
+  "ClusterEB0386A7": {
+   "Type": "AWS::ECS::Cluster",
+   "Properties": {
+    "ClusterSettings": [
+     {
+      "Name": "containerInsights",
+      "Value": "enabled"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "MofiPlatformApi-dev/Cluster/Resource"
+   }
+  },
+  "AppSecretFAB5164C": {
+   "Type": "AWS::SecretsManager::Secret",
+   "Properties": {
+    "Description": "DB, JWT, and broker credentials for MOFI platform API",
+    "GenerateSecretString": {
+     "ExcludePunctuation": true,
+     "GenerateStringKey": "JWT_SECRET",
+     "SecretStringTemplate": "{\"DB_HOST\":\"\",\"DB_PORT\":\"3306\",\"DB_USERNAME\":\"\",\"DB_PASSWORD\":\"\",\"DB_NAME\":\"\",\"AMQP_USERNAME\":\"mofi\"}"
+    },
+    "Name": "mofi-platform-api/dev/app"
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "MofiPlatformApi-dev/AppSecret/Resource"
+   }
+  },
+  "BrokerSecret123CAC7B": {
+   "Type": "AWS::SecretsManager::Secret",
+   "Properties": {
+    "Description": "Amazon MQ RabbitMQ credentials",
+    "GenerateSecretString": {
+     "ExcludePunctuation": true,
+     "GenerateStringKey": "password",
+     "SecretStringTemplate": "{\"username\":\"mofi\"}"
+    },
+    "Name": "mofi-platform-api/dev/rabbitmq"
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "MofiPlatformApi-dev/BrokerSecret/Resource"
+   }
+  },
+  "ApiLogGroup1DEDFC07": {
+   "Type": "AWS::Logs::LogGroup",
+   "Properties": {
+    "LogGroupName": "/ecs/mofi-platform-api-dev",
+    "RetentionInDays": 14
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "MofiPlatformApi-dev/ApiLogGroup/Resource"
+   }
+  },
+  "TaskSecurityGroup2D2EA438": {
+   "Type": "AWS::EC2::SecurityGroup",
+   "Properties": {
+    "GroupDescription": "MOFI platform ECS tasks",
+    "SecurityGroupEgress": [
+     {
+      "CidrIp": "0.0.0.0/0",
+      "Description": "Allow all outbound traffic by default",
+      "IpProtocol": "-1"
+     }
+    ],
+    "VpcId": {
+     "Ref": "Vpc8378EB38"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "MofiPlatformApi-dev/TaskSecurityGroup/Resource"
+   }
+  },
+  "TaskSecurityGroupfromMofiPlatformApidevAlbSecurityGroup77851447808026D7B5AE": {
+   "Type": "AWS::EC2::SecurityGroupIngress",
+   "Properties": {
+    "Description": "Load balancer to target",
+    "FromPort": 8080,
+    "GroupId": {
+     "Fn::GetAtt": [
+      "TaskSecurityGroup2D2EA438",
+      "GroupId"
+     ]
+    },
+    "IpProtocol": "tcp",
+    "SourceSecurityGroupId": {
+     "Fn::GetAtt": [
+      "AlbSecurityGroup580F65A6",
+      "GroupId"
+     ]
+    },
+    "ToPort": 8080
+   },
+   "Metadata": {
+    "aws:cdk:path": "MofiPlatformApi-dev/TaskSecurityGroup/from MofiPlatformApidevAlbSecurityGroup77851447:8080"
+   }
+  },
+  "BrokerSecurityGroup40A43BB1": {
+   "Type": "AWS::EC2::SecurityGroup",
+   "Properties": {
+    "GroupDescription": "Amazon MQ RabbitMQ broker",
+    "SecurityGroupEgress": [
+     {
+      "CidrIp": "0.0.0.0/0",
+      "Description": "Allow all outbound traffic by default",
+      "IpProtocol": "-1"
+     }
+    ],
+    "VpcId": {
+     "Ref": "Vpc8378EB38"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "MofiPlatformApi-dev/BrokerSecurityGroup/Resource"
+   }
+  },
+  "BrokerSecurityGroupfromMofiPlatformApidevTaskSecurityGroup3CACD58B56716D167776": {
+   "Type": "AWS::EC2::SecurityGroupIngress",
+   "Properties": {
+    "Description": "AMQPS from ECS tasks",
+    "FromPort": 5671,
+    "GroupId": {
+     "Fn::GetAtt": [
+      "BrokerSecurityGroup40A43BB1",
+      "GroupId"
+     ]
+    },
+    "IpProtocol": "tcp",
+    "SourceSecurityGroupId": {
+     "Fn::GetAtt": [
+      "TaskSecurityGroup2D2EA438",
+      "GroupId"
+     ]
+    },
+    "ToPort": 5671
+   },
+   "Metadata": {
+    "aws:cdk:path": "MofiPlatformApi-dev/BrokerSecurityGroup/from MofiPlatformApidevTaskSecurityGroup3CACD58B:5671"
+   }
+  },
+  "BrokerSecurityGroupfromMofiPlatformApidevTaskSecurityGroup3CACD58B56725FA13A16": {
+   "Type": "AWS::EC2::SecurityGroupIngress",
+   "Properties": {
+    "Description": "AMQP from ECS tasks",
+    "FromPort": 5672,
+    "GroupId": {
+     "Fn::GetAtt": [
+      "BrokerSecurityGroup40A43BB1",
+      "GroupId"
+     ]
+    },
+    "IpProtocol": "tcp",
+    "SourceSecurityGroupId": {
+     "Fn::GetAtt": [
+      "TaskSecurityGroup2D2EA438",
+      "GroupId"
+     ]
+    },
+    "ToPort": 5672
+   },
+   "Metadata": {
+    "aws:cdk:path": "MofiPlatformApi-dev/BrokerSecurityGroup/from MofiPlatformApidevTaskSecurityGroup3CACD58B:5672"
+   }
+  },
+  "RabbitBroker": {
+   "Type": "AWS::AmazonMQ::Broker",
+   "Properties": {
+    "BrokerName": "mofi-rmq-dev",
+    "DeploymentMode": "SINGLE_INSTANCE",
+    "EngineType": "RabbitMQ",
+    "EngineVersion": "3.13",
+    "HostInstanceType": "mq.m7g.medium",
+    "PubliclyAccessible": false,
+    "SecurityGroups": [
+     {
+      "Fn::GetAtt": [
+       "BrokerSecurityGroup40A43BB1",
+       "GroupId"
+      ]
+     }
+    ],
+    "SubnetIds": [
+     {
+      "Ref": "VpcPrivateSubnet1Subnet536B997A"
+     }
+    ],
+    "Users": [
+     {
+      "Password": {
+       "Fn::Join": [
+        "",
+        [
+         "{{resolve:secretsmanager:",
+         {
+          "Ref": "BrokerSecret123CAC7B"
+         },
+         ":SecretString:password::}}"
+        ]
+       ]
+      },
+      "Username": "mofi"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "MofiPlatformApi-dev/RabbitBroker"
+   }
+  },
+  "TaskRole30FC0FBB": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "ecs-tasks.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "MofiPlatformApi-dev/TaskRole/Resource"
+   }
+  },
+  "TaskRoleDefaultPolicy07FC53DE": {
+   "Type": "AWS::IAM::Policy",
+   "Properties": {
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": [
+        "secretsmanager:GetSecretValue",
+        "secretsmanager:DescribeSecret"
+       ],
+       "Effect": "Allow",
+       "Resource": {
+        "Ref": "AppSecretFAB5164C"
+       }
+      },
+      {
+       "Action": [
+        "secretsmanager:GetSecretValue",
+        "secretsmanager:DescribeSecret"
+       ],
+       "Effect": "Allow",
+       "Resource": {
+        "Ref": "BrokerSecret123CAC7B"
+       }
+      },
+      {
+       "Action": [
+        "s3:GetObject",
+        "s3:PutObject",
+        "s3:DeleteObject"
+       ],
+       "Effect": "Allow",
+       "Resource": "arn:aws:s3:::mofi-*/*"
+      },
+      {
+       "Action": "lambda:InvokeFunction",
+       "Effect": "Allow",
+       "Resource": "arn:aws:lambda:*:*:function:*"
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "PolicyName": "TaskRoleDefaultPolicy07FC53DE",
+    "Roles": [
+     {
+      "Ref": "TaskRole30FC0FBB"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "MofiPlatformApi-dev/TaskRole/DefaultPolicy/Resource"
+   }
+  },
+  "TaskDef54694570": {
+   "Type": "AWS::ECS::TaskDefinition",
+   "Properties": {
+    "ContainerDefinitions": [
+     {
+      "Environment": [
+       {
+        "Name": "NODE_ENV",
+        "Value": "development"
+       },
+       {
+        "Name": "MOFI_STAGE",
+        "Value": "dev"
+       },
+       {
+        "Name": "AUTH_ENFORCEMENT",
+        "Value": "gateway"
+       },
+       {
+        "Name": "MESSAGING_ENABLED",
+        "Value": "true"
+       },
+       {
+        "Name": "NOTIFICATION_MODE",
+        "Value": "async"
+       },
+       {
+        "Name": "LAMBDA_INVOKE_MODE",
+        "Value": "async"
+       },
+       {
+        "Name": "AMQP_VHOST",
+        "Value": "/"
+       },
+       {
+        "Name": "AMQP_USERNAME",
+        "Value": "mofi"
+       },
+       {
+        "Name": "AMQP_URL",
+        "Value": {
+         "Fn::Select": [
+          0,
+          {
+           "Fn::GetAtt": [
+            "RabbitBroker",
+            "AmqpEndpoints"
+           ]
+          }
+         ]
+        }
+       },
+       {
+        "Name": "MOFI_CONTAINER_ROLE",
+        "Value": "edge"
+       },
+       {
+        "Name": "PORT",
+        "Value": "8080"
+       },
+       {
+        "Name": "MOFI_RUNTIME",
+        "Value": "edge"
+       },
+       {
+        "Name": "MOFI_WORKER_QUEUES",
+        "Value": "none"
+       },
+       {
+        "Name": "AGENT_UPSTREAM",
+        "Value": "http://127.0.0.1:3001"
+       },
+       {
+        "Name": "PMB_UPSTREAM",
+        "Value": "http://127.0.0.1:3002"
+       },
+       {
+        "Name": "RSA_UPSTREAM",
+        "Value": "http://127.0.0.1:3003"
+       },
+       {
+        "Name": "DEVELOPER_UPSTREAM",
+        "Value": "http://127.0.0.1:3004"
+       },
+       {
+        "Name": "UPLOADER_UPSTREAM",
+        "Value": "http://127.0.0.1:3005"
+       },
+       {
+        "Name": "COOPERATIVE_UPSTREAM",
+        "Value": "http://127.0.0.1:3006"
+       }
+      ],
+      "Essential": true,
+      "HealthCheck": {
+       "Command": [
+        "CMD-SHELL",
+        "wget -qO- http://127.0.0.1:8080/health || exit 1"
+       ],
+       "Interval": 30,
+       "Retries": 3,
+       "StartPeriod": 90,
+       "Timeout": 5
+      },
+      "Image": {
+       "Fn::Join": [
+        "",
+        [
+         "898751738669.dkr.ecr.us-east-1.",
+         {
+          "Ref": "AWS::URLSuffix"
+         },
+         "/mofi-platform-api-dev:latest"
+        ]
+       ]
+      },
+      "LogConfiguration": {
+       "LogDriver": "awslogs",
+       "Options": {
+        "awslogs-group": {
+         "Ref": "ApiLogGroup1DEDFC07"
+        },
+        "awslogs-stream-prefix": "edge",
+        "awslogs-region": "us-east-1"
+       }
+      },
+      "Name": "edge",
+      "PortMappings": [
+       {
+        "ContainerPort": 8080,
+        "Protocol": "tcp"
+       }
+      ],
+      "Secrets": [
+       {
+        "Name": "DB_HOST",
+        "ValueFrom": {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Ref": "AppSecretFAB5164C"
+           },
+           ":DB_HOST::"
+          ]
+         ]
+        }
+       },
+       {
+        "Name": "DB_PORT",
+        "ValueFrom": {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Ref": "AppSecretFAB5164C"
+           },
+           ":DB_PORT::"
+          ]
+         ]
+        }
+       },
+       {
+        "Name": "DB_USERNAME",
+        "ValueFrom": {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Ref": "AppSecretFAB5164C"
+           },
+           ":DB_USERNAME::"
+          ]
+         ]
+        }
+       },
+       {
+        "Name": "DB_PASSWORD",
+        "ValueFrom": {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Ref": "AppSecretFAB5164C"
+           },
+           ":DB_PASSWORD::"
+          ]
+         ]
+        }
+       },
+       {
+        "Name": "DB_NAME",
+        "ValueFrom": {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Ref": "AppSecretFAB5164C"
+           },
+           ":DB_NAME::"
+          ]
+         ]
+        }
+       },
+       {
+        "Name": "JWT_SECRET",
+        "ValueFrom": {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Ref": "AppSecretFAB5164C"
+           },
+           ":JWT_SECRET::"
+          ]
+         ]
+        }
+       },
+       {
+        "Name": "AMQP_PASSWORD",
+        "ValueFrom": {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Ref": "BrokerSecret123CAC7B"
+           },
+           ":password::"
+          ]
+         ]
+        }
+       }
+      ]
+     },
+     {
+      "Environment": [
+       {
+        "Name": "NODE_ENV",
+        "Value": "development"
+       },
+       {
+        "Name": "MOFI_STAGE",
+        "Value": "dev"
+       },
+       {
+        "Name": "AUTH_ENFORCEMENT",
+        "Value": "gateway"
+       },
+       {
+        "Name": "MESSAGING_ENABLED",
+        "Value": "true"
+       },
+       {
+        "Name": "NOTIFICATION_MODE",
+        "Value": "async"
+       },
+       {
+        "Name": "LAMBDA_INVOKE_MODE",
+        "Value": "async"
+       },
+       {
+        "Name": "AMQP_VHOST",
+        "Value": "/"
+       },
+       {
+        "Name": "AMQP_USERNAME",
+        "Value": "mofi"
+       },
+       {
+        "Name": "AMQP_URL",
+        "Value": {
+         "Fn::Select": [
+          0,
+          {
+           "Fn::GetAtt": [
+            "RabbitBroker",
+            "AmqpEndpoints"
+           ]
+          }
+         ]
+        }
+       },
+       {
+        "Name": "MOFI_CONTAINER_ROLE",
+        "Value": "agent"
+       },
+       {
+        "Name": "PORT",
+        "Value": "3001"
+       },
+       {
+        "Name": "MOFI_RUNTIME",
+        "Value": "domain"
+       },
+       {
+        "Name": "MOFI_WORKER_QUEUES",
+        "Value": "none"
+       }
+      ],
+      "Essential": true,
+      "HealthCheck": {
+       "Command": [
+        "CMD-SHELL",
+        "wget -qO- http://127.0.0.1:3001/agent/health || exit 1"
+       ],
+       "Interval": 30,
+       "Retries": 3,
+       "StartPeriod": 90,
+       "Timeout": 5
+      },
+      "Image": {
+       "Fn::Join": [
+        "",
+        [
+         "898751738669.dkr.ecr.us-east-1.",
+         {
+          "Ref": "AWS::URLSuffix"
+         },
+         "/mofi-platform-api-dev:latest"
+        ]
+       ]
+      },
+      "LogConfiguration": {
+       "LogDriver": "awslogs",
+       "Options": {
+        "awslogs-group": {
+         "Ref": "ApiLogGroup1DEDFC07"
+        },
+        "awslogs-stream-prefix": "agent",
+        "awslogs-region": "us-east-1"
+       }
+      },
+      "Name": "agent",
+      "Secrets": [
+       {
+        "Name": "DB_HOST",
+        "ValueFrom": {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Ref": "AppSecretFAB5164C"
+           },
+           ":DB_HOST::"
+          ]
+         ]
+        }
+       },
+       {
+        "Name": "DB_PORT",
+        "ValueFrom": {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Ref": "AppSecretFAB5164C"
+           },
+           ":DB_PORT::"
+          ]
+         ]
+        }
+       },
+       {
+        "Name": "DB_USERNAME",
+        "ValueFrom": {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Ref": "AppSecretFAB5164C"
+           },
+           ":DB_USERNAME::"
+          ]
+         ]
+        }
+       },
+       {
+        "Name": "DB_PASSWORD",
+        "ValueFrom": {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Ref": "AppSecretFAB5164C"
+           },
+           ":DB_PASSWORD::"
+          ]
+         ]
+        }
+       },
+       {
+        "Name": "DB_NAME",
+        "ValueFrom": {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Ref": "AppSecretFAB5164C"
+           },
+           ":DB_NAME::"
+          ]
+         ]
+        }
+       },
+       {
+        "Name": "JWT_SECRET",
+        "ValueFrom": {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Ref": "AppSecretFAB5164C"
+           },
+           ":JWT_SECRET::"
+          ]
+         ]
+        }
+       },
+       {
+        "Name": "AMQP_PASSWORD",
+        "ValueFrom": {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Ref": "BrokerSecret123CAC7B"
+           },
+           ":password::"
+          ]
+         ]
+        }
+       }
+      ]
+     },
+     {
+      "Environment": [
+       {
+        "Name": "NODE_ENV",
+        "Value": "development"
+       },
+       {
+        "Name": "MOFI_STAGE",
+        "Value": "dev"
+       },
+       {
+        "Name": "AUTH_ENFORCEMENT",
+        "Value": "gateway"
+       },
+       {
+        "Name": "MESSAGING_ENABLED",
+        "Value": "true"
+       },
+       {
+        "Name": "NOTIFICATION_MODE",
+        "Value": "async"
+       },
+       {
+        "Name": "LAMBDA_INVOKE_MODE",
+        "Value": "async"
+       },
+       {
+        "Name": "AMQP_VHOST",
+        "Value": "/"
+       },
+       {
+        "Name": "AMQP_USERNAME",
+        "Value": "mofi"
+       },
+       {
+        "Name": "AMQP_URL",
+        "Value": {
+         "Fn::Select": [
+          0,
+          {
+           "Fn::GetAtt": [
+            "RabbitBroker",
+            "AmqpEndpoints"
+           ]
+          }
+         ]
+        }
+       },
+       {
+        "Name": "MOFI_CONTAINER_ROLE",
+        "Value": "pmb"
+       },
+       {
+        "Name": "PORT",
+        "Value": "3002"
+       },
+       {
+        "Name": "MOFI_RUNTIME",
+        "Value": "domain"
+       },
+       {
+        "Name": "MOFI_WORKER_QUEUES",
+        "Value": "none"
+       }
+      ],
+      "Essential": true,
+      "HealthCheck": {
+       "Command": [
+        "CMD-SHELL",
+        "wget -qO- http://127.0.0.1:3002/pmb/health || exit 1"
+       ],
+       "Interval": 30,
+       "Retries": 3,
+       "StartPeriod": 90,
+       "Timeout": 5
+      },
+      "Image": {
+       "Fn::Join": [
+        "",
+        [
+         "898751738669.dkr.ecr.us-east-1.",
+         {
+          "Ref": "AWS::URLSuffix"
+         },
+         "/mofi-platform-api-dev:latest"
+        ]
+       ]
+      },
+      "LogConfiguration": {
+       "LogDriver": "awslogs",
+       "Options": {
+        "awslogs-group": {
+         "Ref": "ApiLogGroup1DEDFC07"
+        },
+        "awslogs-stream-prefix": "pmb",
+        "awslogs-region": "us-east-1"
+       }
+      },
+      "Name": "pmb",
+      "Secrets": [
+       {
+        "Name": "DB_HOST",
+        "ValueFrom": {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Ref": "AppSecretFAB5164C"
+           },
+           ":DB_HOST::"
+          ]
+         ]
+        }
+       },
+       {
+        "Name": "DB_PORT",
+        "ValueFrom": {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Ref": "AppSecretFAB5164C"
+           },
+           ":DB_PORT::"
+          ]
+         ]
+        }
+       },
+       {
+        "Name": "DB_USERNAME",
+        "ValueFrom": {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Ref": "AppSecretFAB5164C"
+           },
+           ":DB_USERNAME::"
+          ]
+         ]
+        }
+       },
+       {
+        "Name": "DB_PASSWORD",
+        "ValueFrom": {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Ref": "AppSecretFAB5164C"
+           },
+           ":DB_PASSWORD::"
+          ]
+         ]
+        }
+       },
+       {
+        "Name": "DB_NAME",
+        "ValueFrom": {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Ref": "AppSecretFAB5164C"
+           },
+           ":DB_NAME::"
+          ]
+         ]
+        }
+       },
+       {
+        "Name": "JWT_SECRET",
+        "ValueFrom": {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Ref": "AppSecretFAB5164C"
+           },
+           ":JWT_SECRET::"
+          ]
+         ]
+        }
+       },
+       {
+        "Name": "AMQP_PASSWORD",
+        "ValueFrom": {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Ref": "BrokerSecret123CAC7B"
+           },
+           ":password::"
+          ]
+         ]
+        }
+       }
+      ]
+     },
+     {
+      "Environment": [
+       {
+        "Name": "NODE_ENV",
+        "Value": "development"
+       },
+       {
+        "Name": "MOFI_STAGE",
+        "Value": "dev"
+       },
+       {
+        "Name": "AUTH_ENFORCEMENT",
+        "Value": "gateway"
+       },
+       {
+        "Name": "MESSAGING_ENABLED",
+        "Value": "true"
+       },
+       {
+        "Name": "NOTIFICATION_MODE",
+        "Value": "async"
+       },
+       {
+        "Name": "LAMBDA_INVOKE_MODE",
+        "Value": "async"
+       },
+       {
+        "Name": "AMQP_VHOST",
+        "Value": "/"
+       },
+       {
+        "Name": "AMQP_USERNAME",
+        "Value": "mofi"
+       },
+       {
+        "Name": "AMQP_URL",
+        "Value": {
+         "Fn::Select": [
+          0,
+          {
+           "Fn::GetAtt": [
+            "RabbitBroker",
+            "AmqpEndpoints"
+           ]
+          }
+         ]
+        }
+       },
+       {
+        "Name": "MOFI_CONTAINER_ROLE",
+        "Value": "rsa"
+       },
+       {
+        "Name": "PORT",
+        "Value": "3003"
+       },
+       {
+        "Name": "MOFI_RUNTIME",
+        "Value": "domain"
+       },
+       {
+        "Name": "MOFI_WORKER_QUEUES",
+        "Value": "none"
+       }
+      ],
+      "Essential": true,
+      "HealthCheck": {
+       "Command": [
+        "CMD-SHELL",
+        "wget -qO- http://127.0.0.1:3003/rsa/health || exit 1"
+       ],
+       "Interval": 30,
+       "Retries": 3,
+       "StartPeriod": 90,
+       "Timeout": 5
+      },
+      "Image": {
+       "Fn::Join": [
+        "",
+        [
+         "898751738669.dkr.ecr.us-east-1.",
+         {
+          "Ref": "AWS::URLSuffix"
+         },
+         "/mofi-platform-api-dev:latest"
+        ]
+       ]
+      },
+      "LogConfiguration": {
+       "LogDriver": "awslogs",
+       "Options": {
+        "awslogs-group": {
+         "Ref": "ApiLogGroup1DEDFC07"
+        },
+        "awslogs-stream-prefix": "rsa",
+        "awslogs-region": "us-east-1"
+       }
+      },
+      "Name": "rsa",
+      "Secrets": [
+       {
+        "Name": "DB_HOST",
+        "ValueFrom": {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Ref": "AppSecretFAB5164C"
+           },
+           ":DB_HOST::"
+          ]
+         ]
+        }
+       },
+       {
+        "Name": "DB_PORT",
+        "ValueFrom": {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Ref": "AppSecretFAB5164C"
+           },
+           ":DB_PORT::"
+          ]
+         ]
+        }
+       },
+       {
+        "Name": "DB_USERNAME",
+        "ValueFrom": {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Ref": "AppSecretFAB5164C"
+           },
+           ":DB_USERNAME::"
+          ]
+         ]
+        }
+       },
+       {
+        "Name": "DB_PASSWORD",
+        "ValueFrom": {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Ref": "AppSecretFAB5164C"
+           },
+           ":DB_PASSWORD::"
+          ]
+         ]
+        }
+       },
+       {
+        "Name": "DB_NAME",
+        "ValueFrom": {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Ref": "AppSecretFAB5164C"
+           },
+           ":DB_NAME::"
+          ]
+         ]
+        }
+       },
+       {
+        "Name": "JWT_SECRET",
+        "ValueFrom": {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Ref": "AppSecretFAB5164C"
+           },
+           ":JWT_SECRET::"
+          ]
+         ]
+        }
+       },
+       {
+        "Name": "AMQP_PASSWORD",
+        "ValueFrom": {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Ref": "BrokerSecret123CAC7B"
+           },
+           ":password::"
+          ]
+         ]
+        }
+       }
+      ]
+     },
+     {
+      "Environment": [
+       {
+        "Name": "NODE_ENV",
+        "Value": "development"
+       },
+       {
+        "Name": "MOFI_STAGE",
+        "Value": "dev"
+       },
+       {
+        "Name": "AUTH_ENFORCEMENT",
+        "Value": "gateway"
+       },
+       {
+        "Name": "MESSAGING_ENABLED",
+        "Value": "true"
+       },
+       {
+        "Name": "NOTIFICATION_MODE",
+        "Value": "async"
+       },
+       {
+        "Name": "LAMBDA_INVOKE_MODE",
+        "Value": "async"
+       },
+       {
+        "Name": "AMQP_VHOST",
+        "Value": "/"
+       },
+       {
+        "Name": "AMQP_USERNAME",
+        "Value": "mofi"
+       },
+       {
+        "Name": "AMQP_URL",
+        "Value": {
+         "Fn::Select": [
+          0,
+          {
+           "Fn::GetAtt": [
+            "RabbitBroker",
+            "AmqpEndpoints"
+           ]
+          }
+         ]
+        }
+       },
+       {
+        "Name": "MOFI_CONTAINER_ROLE",
+        "Value": "developer"
+       },
+       {
+        "Name": "PORT",
+        "Value": "3004"
+       },
+       {
+        "Name": "MOFI_RUNTIME",
+        "Value": "domain"
+       },
+       {
+        "Name": "MOFI_WORKER_QUEUES",
+        "Value": "none"
+       }
+      ],
+      "Essential": true,
+      "HealthCheck": {
+       "Command": [
+        "CMD-SHELL",
+        "wget -qO- http://127.0.0.1:3004/developer/health || exit 1"
+       ],
+       "Interval": 30,
+       "Retries": 3,
+       "StartPeriod": 90,
+       "Timeout": 5
+      },
+      "Image": {
+       "Fn::Join": [
+        "",
+        [
+         "898751738669.dkr.ecr.us-east-1.",
+         {
+          "Ref": "AWS::URLSuffix"
+         },
+         "/mofi-platform-api-dev:latest"
+        ]
+       ]
+      },
+      "LogConfiguration": {
+       "LogDriver": "awslogs",
+       "Options": {
+        "awslogs-group": {
+         "Ref": "ApiLogGroup1DEDFC07"
+        },
+        "awslogs-stream-prefix": "developer",
+        "awslogs-region": "us-east-1"
+       }
+      },
+      "Name": "developer",
+      "Secrets": [
+       {
+        "Name": "DB_HOST",
+        "ValueFrom": {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Ref": "AppSecretFAB5164C"
+           },
+           ":DB_HOST::"
+          ]
+         ]
+        }
+       },
+       {
+        "Name": "DB_PORT",
+        "ValueFrom": {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Ref": "AppSecretFAB5164C"
+           },
+           ":DB_PORT::"
+          ]
+         ]
+        }
+       },
+       {
+        "Name": "DB_USERNAME",
+        "ValueFrom": {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Ref": "AppSecretFAB5164C"
+           },
+           ":DB_USERNAME::"
+          ]
+         ]
+        }
+       },
+       {
+        "Name": "DB_PASSWORD",
+        "ValueFrom": {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Ref": "AppSecretFAB5164C"
+           },
+           ":DB_PASSWORD::"
+          ]
+         ]
+        }
+       },
+       {
+        "Name": "DB_NAME",
+        "ValueFrom": {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Ref": "AppSecretFAB5164C"
+           },
+           ":DB_NAME::"
+          ]
+         ]
+        }
+       },
+       {
+        "Name": "JWT_SECRET",
+        "ValueFrom": {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Ref": "AppSecretFAB5164C"
+           },
+           ":JWT_SECRET::"
+          ]
+         ]
+        }
+       },
+       {
+        "Name": "AMQP_PASSWORD",
+        "ValueFrom": {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Ref": "BrokerSecret123CAC7B"
+           },
+           ":password::"
+          ]
+         ]
+        }
+       }
+      ]
+     },
+     {
+      "Environment": [
+       {
+        "Name": "NODE_ENV",
+        "Value": "development"
+       },
+       {
+        "Name": "MOFI_STAGE",
+        "Value": "dev"
+       },
+       {
+        "Name": "AUTH_ENFORCEMENT",
+        "Value": "gateway"
+       },
+       {
+        "Name": "MESSAGING_ENABLED",
+        "Value": "true"
+       },
+       {
+        "Name": "NOTIFICATION_MODE",
+        "Value": "async"
+       },
+       {
+        "Name": "LAMBDA_INVOKE_MODE",
+        "Value": "async"
+       },
+       {
+        "Name": "AMQP_VHOST",
+        "Value": "/"
+       },
+       {
+        "Name": "AMQP_USERNAME",
+        "Value": "mofi"
+       },
+       {
+        "Name": "AMQP_URL",
+        "Value": {
+         "Fn::Select": [
+          0,
+          {
+           "Fn::GetAtt": [
+            "RabbitBroker",
+            "AmqpEndpoints"
+           ]
+          }
+         ]
+        }
+       },
+       {
+        "Name": "MOFI_CONTAINER_ROLE",
+        "Value": "uploader"
+       },
+       {
+        "Name": "PORT",
+        "Value": "3005"
+       },
+       {
+        "Name": "MOFI_RUNTIME",
+        "Value": "domain"
+       },
+       {
+        "Name": "MOFI_WORKER_QUEUES",
+        "Value": "none"
+       }
+      ],
+      "Essential": true,
+      "HealthCheck": {
+       "Command": [
+        "CMD-SHELL",
+        "wget -qO- http://127.0.0.1:3005/uploader/health || exit 1"
+       ],
+       "Interval": 30,
+       "Retries": 3,
+       "StartPeriod": 90,
+       "Timeout": 5
+      },
+      "Image": {
+       "Fn::Join": [
+        "",
+        [
+         "898751738669.dkr.ecr.us-east-1.",
+         {
+          "Ref": "AWS::URLSuffix"
+         },
+         "/mofi-platform-api-dev:latest"
+        ]
+       ]
+      },
+      "LogConfiguration": {
+       "LogDriver": "awslogs",
+       "Options": {
+        "awslogs-group": {
+         "Ref": "ApiLogGroup1DEDFC07"
+        },
+        "awslogs-stream-prefix": "uploader",
+        "awslogs-region": "us-east-1"
+       }
+      },
+      "Name": "uploader",
+      "Secrets": [
+       {
+        "Name": "DB_HOST",
+        "ValueFrom": {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Ref": "AppSecretFAB5164C"
+           },
+           ":DB_HOST::"
+          ]
+         ]
+        }
+       },
+       {
+        "Name": "DB_PORT",
+        "ValueFrom": {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Ref": "AppSecretFAB5164C"
+           },
+           ":DB_PORT::"
+          ]
+         ]
+        }
+       },
+       {
+        "Name": "DB_USERNAME",
+        "ValueFrom": {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Ref": "AppSecretFAB5164C"
+           },
+           ":DB_USERNAME::"
+          ]
+         ]
+        }
+       },
+       {
+        "Name": "DB_PASSWORD",
+        "ValueFrom": {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Ref": "AppSecretFAB5164C"
+           },
+           ":DB_PASSWORD::"
+          ]
+         ]
+        }
+       },
+       {
+        "Name": "DB_NAME",
+        "ValueFrom": {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Ref": "AppSecretFAB5164C"
+           },
+           ":DB_NAME::"
+          ]
+         ]
+        }
+       },
+       {
+        "Name": "JWT_SECRET",
+        "ValueFrom": {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Ref": "AppSecretFAB5164C"
+           },
+           ":JWT_SECRET::"
+          ]
+         ]
+        }
+       },
+       {
+        "Name": "AMQP_PASSWORD",
+        "ValueFrom": {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Ref": "BrokerSecret123CAC7B"
+           },
+           ":password::"
+          ]
+         ]
+        }
+       }
+      ]
+     },
+     {
+      "Environment": [
+       {
+        "Name": "NODE_ENV",
+        "Value": "development"
+       },
+       {
+        "Name": "MOFI_STAGE",
+        "Value": "dev"
+       },
+       {
+        "Name": "AUTH_ENFORCEMENT",
+        "Value": "gateway"
+       },
+       {
+        "Name": "MESSAGING_ENABLED",
+        "Value": "true"
+       },
+       {
+        "Name": "NOTIFICATION_MODE",
+        "Value": "async"
+       },
+       {
+        "Name": "LAMBDA_INVOKE_MODE",
+        "Value": "async"
+       },
+       {
+        "Name": "AMQP_VHOST",
+        "Value": "/"
+       },
+       {
+        "Name": "AMQP_USERNAME",
+        "Value": "mofi"
+       },
+       {
+        "Name": "AMQP_URL",
+        "Value": {
+         "Fn::Select": [
+          0,
+          {
+           "Fn::GetAtt": [
+            "RabbitBroker",
+            "AmqpEndpoints"
+           ]
+          }
+         ]
+        }
+       },
+       {
+        "Name": "MOFI_CONTAINER_ROLE",
+        "Value": "cooperative"
+       },
+       {
+        "Name": "PORT",
+        "Value": "3006"
+       },
+       {
+        "Name": "MOFI_RUNTIME",
+        "Value": "domain"
+       },
+       {
+        "Name": "MOFI_WORKER_QUEUES",
+        "Value": "none"
+       }
+      ],
+      "Essential": true,
+      "HealthCheck": {
+       "Command": [
+        "CMD-SHELL",
+        "wget -qO- http://127.0.0.1:3006/cooperative/health || exit 1"
+       ],
+       "Interval": 30,
+       "Retries": 3,
+       "StartPeriod": 90,
+       "Timeout": 5
+      },
+      "Image": {
+       "Fn::Join": [
+        "",
+        [
+         "898751738669.dkr.ecr.us-east-1.",
+         {
+          "Ref": "AWS::URLSuffix"
+         },
+         "/mofi-platform-api-dev:latest"
+        ]
+       ]
+      },
+      "LogConfiguration": {
+       "LogDriver": "awslogs",
+       "Options": {
+        "awslogs-group": {
+         "Ref": "ApiLogGroup1DEDFC07"
+        },
+        "awslogs-stream-prefix": "cooperative",
+        "awslogs-region": "us-east-1"
+       }
+      },
+      "Name": "cooperative",
+      "Secrets": [
+       {
+        "Name": "DB_HOST",
+        "ValueFrom": {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Ref": "AppSecretFAB5164C"
+           },
+           ":DB_HOST::"
+          ]
+         ]
+        }
+       },
+       {
+        "Name": "DB_PORT",
+        "ValueFrom": {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Ref": "AppSecretFAB5164C"
+           },
+           ":DB_PORT::"
+          ]
+         ]
+        }
+       },
+       {
+        "Name": "DB_USERNAME",
+        "ValueFrom": {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Ref": "AppSecretFAB5164C"
+           },
+           ":DB_USERNAME::"
+          ]
+         ]
+        }
+       },
+       {
+        "Name": "DB_PASSWORD",
+        "ValueFrom": {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Ref": "AppSecretFAB5164C"
+           },
+           ":DB_PASSWORD::"
+          ]
+         ]
+        }
+       },
+       {
+        "Name": "DB_NAME",
+        "ValueFrom": {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Ref": "AppSecretFAB5164C"
+           },
+           ":DB_NAME::"
+          ]
+         ]
+        }
+       },
+       {
+        "Name": "JWT_SECRET",
+        "ValueFrom": {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Ref": "AppSecretFAB5164C"
+           },
+           ":JWT_SECRET::"
+          ]
+         ]
+        }
+       },
+       {
+        "Name": "AMQP_PASSWORD",
+        "ValueFrom": {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Ref": "BrokerSecret123CAC7B"
+           },
+           ":password::"
+          ]
+         ]
+        }
+       }
+      ]
+     },
+     {
+      "Environment": [
+       {
+        "Name": "NODE_ENV",
+        "Value": "development"
+       },
+       {
+        "Name": "MOFI_STAGE",
+        "Value": "dev"
+       },
+       {
+        "Name": "AUTH_ENFORCEMENT",
+        "Value": "gateway"
+       },
+       {
+        "Name": "MESSAGING_ENABLED",
+        "Value": "true"
+       },
+       {
+        "Name": "NOTIFICATION_MODE",
+        "Value": "async"
+       },
+       {
+        "Name": "LAMBDA_INVOKE_MODE",
+        "Value": "async"
+       },
+       {
+        "Name": "AMQP_VHOST",
+        "Value": "/"
+       },
+       {
+        "Name": "AMQP_USERNAME",
+        "Value": "mofi"
+       },
+       {
+        "Name": "AMQP_URL",
+        "Value": {
+         "Fn::Select": [
+          0,
+          {
+           "Fn::GetAtt": [
+            "RabbitBroker",
+            "AmqpEndpoints"
+           ]
+          }
+         ]
+        }
+       },
+       {
+        "Name": "MOFI_CONTAINER_ROLE",
+        "Value": "worker"
+       },
+       {
+        "Name": "PORT",
+        "Value": "3007"
+       },
+       {
+        "Name": "MOFI_RUNTIME",
+        "Value": "worker"
+       },
+       {
+        "Name": "MOFI_WORKER_QUEUES",
+        "Value": "all"
+       }
+      ],
+      "Essential": true,
+      "HealthCheck": {
+       "Command": [
+        "CMD-SHELL",
+        "wget -qO- http://127.0.0.1:3007/health || exit 1"
+       ],
+       "Interval": 30,
+       "Retries": 3,
+       "StartPeriod": 90,
+       "Timeout": 5
+      },
+      "Image": {
+       "Fn::Join": [
+        "",
+        [
+         "898751738669.dkr.ecr.us-east-1.",
+         {
+          "Ref": "AWS::URLSuffix"
+         },
+         "/mofi-platform-api-dev:latest"
+        ]
+       ]
+      },
+      "LogConfiguration": {
+       "LogDriver": "awslogs",
+       "Options": {
+        "awslogs-group": {
+         "Ref": "ApiLogGroup1DEDFC07"
+        },
+        "awslogs-stream-prefix": "worker",
+        "awslogs-region": "us-east-1"
+       }
+      },
+      "Name": "worker",
+      "Secrets": [
+       {
+        "Name": "DB_HOST",
+        "ValueFrom": {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Ref": "AppSecretFAB5164C"
+           },
+           ":DB_HOST::"
+          ]
+         ]
+        }
+       },
+       {
+        "Name": "DB_PORT",
+        "ValueFrom": {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Ref": "AppSecretFAB5164C"
+           },
+           ":DB_PORT::"
+          ]
+         ]
+        }
+       },
+       {
+        "Name": "DB_USERNAME",
+        "ValueFrom": {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Ref": "AppSecretFAB5164C"
+           },
+           ":DB_USERNAME::"
+          ]
+         ]
+        }
+       },
+       {
+        "Name": "DB_PASSWORD",
+        "ValueFrom": {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Ref": "AppSecretFAB5164C"
+           },
+           ":DB_PASSWORD::"
+          ]
+         ]
+        }
+       },
+       {
+        "Name": "DB_NAME",
+        "ValueFrom": {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Ref": "AppSecretFAB5164C"
+           },
+           ":DB_NAME::"
+          ]
+         ]
+        }
+       },
+       {
+        "Name": "JWT_SECRET",
+        "ValueFrom": {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Ref": "AppSecretFAB5164C"
+           },
+           ":JWT_SECRET::"
+          ]
+         ]
+        }
+       },
+       {
+        "Name": "AMQP_PASSWORD",
+        "ValueFrom": {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Ref": "BrokerSecret123CAC7B"
+           },
+           ":password::"
+          ]
+         ]
+        }
+       }
+      ]
+     }
+    ],
+    "Cpu": "2048",
+    "ExecutionRoleArn": {
+     "Fn::GetAtt": [
+      "TaskDefExecutionRoleB4775C97",
+      "Arn"
+     ]
+    },
+    "Family": "MofiPlatformApidevTaskDef55A2E9CB",
+    "Memory": "4096",
+    "NetworkMode": "awsvpc",
+    "RequiresCompatibilities": [
+     "FARGATE"
+    ],
+    "TaskRoleArn": {
+     "Fn::GetAtt": [
+      "TaskRole30FC0FBB",
+      "Arn"
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "MofiPlatformApi-dev/TaskDef/Resource"
+   }
+  },
+  "TaskDefExecutionRoleB4775C97": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "ecs-tasks.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "MofiPlatformApi-dev/TaskDef/ExecutionRole/Resource"
+   }
+  },
+  "TaskDefExecutionRoleDefaultPolicy0DBB737A": {
+   "Type": "AWS::IAM::Policy",
+   "Properties": {
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": [
+        "ecr:BatchCheckLayerAvailability",
+        "ecr:GetDownloadUrlForLayer",
+        "ecr:BatchGetImage"
+       ],
+       "Effect": "Allow",
+       "Resource": {
+        "Fn::Join": [
+         "",
+         [
+          "arn:",
+          {
+           "Ref": "AWS::Partition"
+          },
+          ":ecr:us-east-1:898751738669:repository/mofi-platform-api-dev"
+         ]
+        ]
+       }
+      },
+      {
+       "Action": "ecr:GetAuthorizationToken",
+       "Effect": "Allow",
+       "Resource": "*"
+      },
+      {
+       "Action": [
+        "logs:CreateLogStream",
+        "logs:PutLogEvents"
+       ],
+       "Effect": "Allow",
+       "Resource": {
+        "Fn::GetAtt": [
+         "ApiLogGroup1DEDFC07",
+         "Arn"
+        ]
+       }
+      },
+      {
+       "Action": [
+        "secretsmanager:GetSecretValue",
+        "secretsmanager:DescribeSecret"
+       ],
+       "Effect": "Allow",
+       "Resource": {
+        "Ref": "AppSecretFAB5164C"
+       }
+      },
+      {
+       "Action": [
+        "secretsmanager:GetSecretValue",
+        "secretsmanager:DescribeSecret"
+       ],
+       "Effect": "Allow",
+       "Resource": {
+        "Ref": "BrokerSecret123CAC7B"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "PolicyName": "TaskDefExecutionRoleDefaultPolicy0DBB737A",
+    "Roles": [
+     {
+      "Ref": "TaskDefExecutionRoleB4775C97"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "MofiPlatformApi-dev/TaskDef/ExecutionRole/DefaultPolicy/Resource"
+   }
+  },
+  "ServiceD69D759B": {
+   "Type": "AWS::ECS::Service",
+   "Properties": {
+    "Cluster": {
+     "Ref": "ClusterEB0386A7"
+    },
+    "DeploymentConfiguration": {
+     "Alarms": {
+      "AlarmNames": [],
+      "Enable": false,
+      "Rollback": false
+     },
+     "MaximumPercent": 200,
+     "MinimumHealthyPercent": 50
+    },
+    "DesiredCount": 1,
+    "EnableECSManagedTags": false,
+    "HealthCheckGracePeriodSeconds": 60,
+    "LaunchType": "FARGATE",
+    "LoadBalancers": [
+     {
+      "ContainerName": "edge",
+      "ContainerPort": 8080,
+      "TargetGroupArn": {
+       "Ref": "AlbHttpListenerEcsTargetGroupE020E009"
+      }
+     }
+    ],
+    "NetworkConfiguration": {
+     "AwsvpcConfiguration": {
+      "AssignPublicIp": "ENABLED",
+      "SecurityGroups": [
+       {
+        "Fn::GetAtt": [
+         "TaskSecurityGroup2D2EA438",
+         "GroupId"
+        ]
+       }
+      ],
+      "Subnets": [
+       {
+        "Ref": "VpcPublicSubnet1Subnet5C2D37C4"
+       },
+       {
+        "Ref": "VpcPublicSubnet2Subnet691E08A3"
+       }
+      ]
+     }
+    },
+    "TaskDefinition": {
+     "Ref": "TaskDef54694570"
+    }
+   },
+   "DependsOn": [
+    "AlbHttpListenerEcsTargetGroupE020E009",
+    "AlbHttpListener00C8B33E",
+    "RabbitBroker",
+    "TaskRoleDefaultPolicy07FC53DE",
+    "TaskRole30FC0FBB"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "MofiPlatformApi-dev/Service/Service"
+   }
+  },
+  "Alb16C2F182": {
+   "Type": "AWS::ElasticLoadBalancingV2::LoadBalancer",
+   "Properties": {
+    "LoadBalancerAttributes": [
+     {
+      "Key": "deletion_protection.enabled",
+      "Value": "false"
+     },
+     {
+      "Key": "idle_timeout.timeout_seconds",
+      "Value": "120"
+     }
+    ],
+    "Scheme": "internet-facing",
+    "SecurityGroups": [
+     {
+      "Fn::GetAtt": [
+       "AlbSecurityGroup580F65A6",
+       "GroupId"
+      ]
+     }
+    ],
+    "Subnets": [
+     {
+      "Ref": "VpcPublicSubnet1Subnet5C2D37C4"
+     },
+     {
+      "Ref": "VpcPublicSubnet2Subnet691E08A3"
+     }
+    ],
+    "Type": "application"
+   },
+   "DependsOn": [
+    "VpcPublicSubnet1DefaultRoute3DA9E72A",
+    "VpcPublicSubnet1RouteTableAssociation97140677",
+    "VpcPublicSubnet2DefaultRoute97F91067",
+    "VpcPublicSubnet2RouteTableAssociationDD5762D8"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "MofiPlatformApi-dev/Alb/Resource"
+   }
+  },
+  "AlbSecurityGroup580F65A6": {
+   "Type": "AWS::EC2::SecurityGroup",
+   "Properties": {
+    "GroupDescription": "Automatically created Security Group for ELB MofiPlatformApidevAlb01859EBA",
+    "SecurityGroupIngress": [
+     {
+      "CidrIp": "0.0.0.0/0",
+      "Description": "Allow from anyone on port 80",
+      "FromPort": 80,
+      "IpProtocol": "tcp",
+      "ToPort": 80
+     }
+    ],
+    "VpcId": {
+     "Ref": "Vpc8378EB38"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "MofiPlatformApi-dev/Alb/SecurityGroup/Resource"
+   }
+  },
+  "AlbSecurityGrouptoMofiPlatformApidevTaskSecurityGroup3CACD58B80807C5E9870": {
+   "Type": "AWS::EC2::SecurityGroupEgress",
+   "Properties": {
+    "Description": "Load balancer to target",
+    "DestinationSecurityGroupId": {
+     "Fn::GetAtt": [
+      "TaskSecurityGroup2D2EA438",
+      "GroupId"
+     ]
+    },
+    "FromPort": 8080,
+    "GroupId": {
+     "Fn::GetAtt": [
+      "AlbSecurityGroup580F65A6",
+      "GroupId"
+     ]
+    },
+    "IpProtocol": "tcp",
+    "ToPort": 8080
+   },
+   "Metadata": {
+    "aws:cdk:path": "MofiPlatformApi-dev/Alb/SecurityGroup/to MofiPlatformApidevTaskSecurityGroup3CACD58B:8080"
+   }
+  },
+  "AlbHttpListener00C8B33E": {
+   "Type": "AWS::ElasticLoadBalancingV2::Listener",
+   "Properties": {
+    "DefaultActions": [
+     {
+      "TargetGroupArn": {
+       "Ref": "AlbHttpListenerEcsTargetGroupE020E009"
+      },
+      "Type": "forward"
+     }
+    ],
+    "LoadBalancerArn": {
+     "Ref": "Alb16C2F182"
+    },
+    "Port": 80,
+    "Protocol": "HTTP"
+   },
+   "Metadata": {
+    "aws:cdk:path": "MofiPlatformApi-dev/Alb/HttpListener/Resource"
+   }
+  },
+  "AlbHttpListenerEcsTargetGroupE020E009": {
+   "Type": "AWS::ElasticLoadBalancingV2::TargetGroup",
+   "Properties": {
+    "HealthCheckPath": "/health",
+    "Matcher": {
+     "HttpCode": "200"
+    },
+    "Port": 8080,
+    "Protocol": "HTTP",
+    "TargetGroupAttributes": [
+     {
+      "Key": "stickiness.enabled",
+      "Value": "false"
+     }
+    ],
+    "TargetType": "ip",
+    "VpcId": {
+     "Ref": "Vpc8378EB38"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "MofiPlatformApi-dev/Alb/HttpListener/EcsTargetGroup/Resource"
+   }
+  },
+  "CDKMetadata": {
+   "Type": "AWS::CDK::Metadata",
+   "Properties": {
+    "Analytics": "v2:deflate64:H4sIAAAAAAAA/31SXU/CQBD8Lb4fp2k0PgMqISHaFMKr2R5LXWjv6n1AsOl/d9tSipr4dLOz097s7EUyenyQdzdwdCO12Y9ySmW19KD2gqn3ClUkq3WpxHSr1/FUxCHNSS1DqtE33IASEzyuIM1x4Adu7JxRBJ6Mvogb8DyPm+MV/Aw8HuEkYksHhsOP59qjZdwLOifnauzZ60eB2oslqmDJn2bWhLL18C8x15lF5/7wzy1dC1ROVtM8OL69EfXwBWwGzVRu/4Rb0tTP9Jsx2gNptFfc+dsl2gOpLqcONtdZmWBpHHljTxNwKBxz6F0BGjK0vJa2PhtmVIvcZGxyYbLLiD2uBRTwZXTxKZmdWLNn6wSFrBLTbag9Y8PbbCPtEPvIwXlSuYFNCjloRTo78BsYlyUL2gUuuDdpe10yP+prHXFg+qzp8VV/xWnwWnvrV2VdiwSdCbYL6S34MvC42mxQ7tztIbqXET/anSMa2aA9FSiT7vwGFMiAdtECAAA="
+   },
+   "Metadata": {
+    "aws:cdk:path": "MofiPlatformApi-dev/CDKMetadata/Default"
+   }
+  }
+ },
+ "Outputs": {
+  "LoadBalancerDns": {
+   "Value": {
+    "Fn::GetAtt": [
+     "Alb16C2F182",
+     "DNSName"
+    ]
+   }
+  },
+  "EcrRepositoryUri": {
+   "Value": {
+    "Fn::Join": [
+     "",
+     [
+      "898751738669.dkr.ecr.us-east-1.",
+      {
+       "Ref": "AWS::URLSuffix"
+      },
+      "/mofi-platform-api-dev"
+     ]
+    ]
+   }
+  },
+  "ClusterName": {
+   "Value": {
+    "Ref": "ClusterEB0386A7"
+   }
+  },
+  "SecretArn": {
+   "Value": {
+    "Ref": "AppSecretFAB5164C"
+   }
+  },
+  "BrokerSecretArn": {
+   "Value": {
+    "Ref": "BrokerSecret123CAC7B"
+   }
+  },
+  "DeploymentMode": {
+   "Value": "multicontainer"
+  }
+ },
+ "Parameters": {
+  "BootstrapVersion": {
+   "Type": "AWS::SSM::Parameter::Value<String>",
+   "Default": "/cdk-bootstrap/hnb659fds/version",
+   "Description": "Version of the CDK Bootstrap resources in this environment, automatically retrieved from SSM Parameter Store. [cdk:skip]"
+  }
+ },
+ "Rules": {
+  "CheckBootstrapVersion": {
+   "Assertions": [
+    {
+     "Assert": {
+      "Fn::Not": [
+       {
+        "Fn::Contains": [
+         [
+          "1",
+          "2",
+          "3",
+          "4",
+          "5"
+         ],
+         {
+          "Ref": "BootstrapVersion"
+         }
+        ]
+       }
+      ]
+     },
+     "AssertDescription": "CDK bootstrap stack version 6 required. Please run 'cdk bootstrap' with a recent version of the CDK CLI."
+    }
+   ]
+  }
+ }
+}

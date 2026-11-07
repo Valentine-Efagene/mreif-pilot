@@ -1,0 +1,21 @@
+{
+  "version": "55.0.0",
+  "files": {
+    "64f7ff420a0d1da7fab24887582fb8eb55e730c331933c12530ff07f2b254ced": {
+      "displayName": "MofiPlatformApi-dev Template",
+      "source": {
+        "path": "MofiPlatformApi-dev.template.json",
+        "packaging": "file"
+      },
+      "destinations": {
+        "898751738669-us-east-1-37b0db4f": {
+          "bucketName": "cdk-hnb659fds-assets-898751738669-us-east-1",
+          "objectKey": "64f7ff420a0d1da7fab24887582fb8eb55e730c331933c12530ff07f2b254ced.json",
+          "region": "us-east-1",
+          "assumeRoleArn": "arn:${AWS::Partition}:iam::898751738669:role/cdk-hnb659fds-file-publishing-role-898751738669-us-east-1"
+        }
+      }
+    }
+  },
+  "dockerImages": {}
+}

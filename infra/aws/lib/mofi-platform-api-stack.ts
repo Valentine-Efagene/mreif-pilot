@@ -59,18 +59,23 @@ export class MofiPlatformApiStack extends cdk.Stack {
       containerInsights: true,
     });
 
-    const repository = new ecr.Repository(this, 'ApiRepository', {
-      repositoryName: `mofi-platform-api-${stage}`,
-      removalPolicy: cdk.RemovalPolicy.RETAIN,
-      lifecycleRules: [{ maxImageCount: 10 }],
-    });
+    // Repo is retained on stack delete (RemovalPolicy.RETAIN); re-use it on redeploy.
+    const repository = ecr.Repository.fromRepositoryName(
+      this,
+      'ApiRepository',
+      `mofi-platform-api-${stage}`,
+    );
 
     const appSecret = new secretsmanager.Secret(this, 'AppSecret', {
       secretName: `mofi-platform-api/${stage}/app`,
       description: 'DB, JWT, and broker credentials for MOFI platform API',
       generateSecretString: {
+        // ECS task definition expects these JSON keys (populate after deploy).
         secretStringTemplate: JSON.stringify({
           DB_HOST: '',
+          DB_PORT: '3306',
+          DB_USERNAME: '',
+          DB_PASSWORD: '',
           DB_NAME: '',
           AMQP_USERNAME: 'mofi',
         }),

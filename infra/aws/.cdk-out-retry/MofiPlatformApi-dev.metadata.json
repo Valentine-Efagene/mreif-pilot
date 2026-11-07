@@ -1,0 +1,834 @@
+{
+  "/MofiPlatformApi-dev": [
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "<anonymous> (/Users/valentyne/Documents/code/qshelter/mreif/mofi-platform-api/infra/aws/bin/mofi-platform-api.ts:13:1)",
+        "...node internals, ts-node, ts-node..."
+      ]
+    },
+    {
+      "type": "aws:cdk:acknowledged-rules",
+      "data": {
+        "CloudFormation-Validate::W3010": "Literal AZs in template are the result of accessing stack.availabilityZones, this is expected and safe"
+      },
+      "trace": [
+        "    ...new Vpc2 in aws-cdk-lib...",
+        "    at new MofiPlatformApiStack (/Users/valentyne/Documents/code/qshelter/mreif/mofi-platform-api/infra/aws/lib/mofi-platform-api-stack.ts:52:17)",
+        "    at <anonymous> (/Users/valentyne/Documents/code/qshelter/mreif/mofi-platform-api/infra/aws/bin/mofi-platform-api.ts:13:1)",
+        "    ...node internals, ts-node..."
+      ]
+    },
+    {
+      "type": "aws:cdk:templateFile",
+      "data": "MofiPlatformApi-dev.template.json"
+    }
+  ],
+  "/MofiPlatformApi-dev/RabbitBroker": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "RabbitBroker"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "new MofiPlatformApiStack (/Users/valentyne/Documents/code/qshelter/mreif/mofi-platform-api/infra/aws/lib/mofi-platform-api-stack.ts:117:20)",
+        "<anonymous> (/Users/valentyne/Documents/code/qshelter/mreif/mofi-platform-api/infra/aws/bin/mofi-platform-api.ts:13:1)",
+        "...node internals, ts-node, ts-node..."
+      ]
+    }
+  ],
+  "/MofiPlatformApi-dev/Service": [
+    {
+      "type": "aws:cdk:warning",
+      "data": "Enable the 'circuitBreaker' property to trigger a quicker deployment failure if tasks are failing to start up (without this setting deployments may take up to 3 hours to fail). [ack: @aws-cdk/aws-ecs:shouldUseCircuitBreaker]",
+      "trace": [
+        "Annotations.addMessage (/Users/valentyne/Documents/code/qshelter/mreif/mofi-platform-api/infra/aws/node_modules/aws-cdk-lib/core/lib/annotations.js:1:3506)",
+        "Annotations.addWarningV2 (/Users/valentyne/Documents/code/qshelter/mreif/mofi-platform-api/infra/aws/node_modules/aws-cdk-lib/core/lib/annotations.js:1:2194)",
+        "new BaseService2 (/Users/valentyne/Documents/code/qshelter/mreif/mofi-platform-api/infra/aws/node_modules/aws-cdk-lib/aws-ecs/lib/base/base-service.js:1:14814)",
+        "new BaseService2 (/Users/valentyne/Documents/code/qshelter/mreif/mofi-platform-api/infra/aws/node_modules/aws-cdk-lib/core/lib/no-box-stack-traces.js:1:349)",
+        "new FargateService2 (/Users/valentyne/Documents/code/qshelter/mreif/mofi-platform-api/infra/aws/node_modules/aws-cdk-lib/aws-ecs/lib/fargate/fargate-service.js:1:8083)",
+        "new FargateService2 (/Users/valentyne/Documents/code/qshelter/mreif/mofi-platform-api/infra/aws/node_modules/aws-cdk-lib/core/lib/prop-injectable.js:1:861)",
+        "new MofiPlatformApiStack (/Users/valentyne/Documents/code/qshelter/mreif/mofi-platform-api/infra/aws/lib/mofi-platform-api-stack.ts:255:21)",
+        "Object.<anonymous> (/Users/valentyne/Documents/code/qshelter/mreif/mofi-platform-api/infra/aws/bin/mofi-platform-api.ts:13:1)",
+        "Module._compile (node:internal/modules/cjs/loader:1734:14)",
+        "Module.m._compile (/Users/valentyne/Documents/code/qshelter/mreif/mofi-platform-api/infra/aws/node_modules/ts-node/src/index.ts:1618:23)",
+        "loadTS (node:internal/modules/cjs/loader:1826:10)",
+        "Object.require.extensions.<computed> [as .ts] (/Users/valentyne/Documents/code/qshelter/mreif/mofi-platform-api/infra/aws/node_modules/ts-node/src/index.ts:1621:12)",
+        "Module.load (node:internal/modules/cjs/loader:1469:32)",
+        "Module._load (node:internal/modules/cjs/loader:1286:12)",
+        "TracingChannel.traceSync (node:diagnostics_channel:322:14)",
+        "wrapModuleLoad (node:internal/modules/cjs/loader:235:24)",
+        "Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:152:5)",
+        "phase4 (/Users/valentyne/Documents/code/qshelter/mreif/mofi-platform-api/infra/aws/node_modules/ts-node/src/bin.ts:649:14)",
+        "bootstrap (/Users/valentyne/Documents/code/qshelter/mreif/mofi-platform-api/infra/aws/node_modules/ts-node/src/bin.ts:95:10)",
+        "main (/Users/valentyne/Documents/code/qshelter/mreif/mofi-platform-api/infra/aws/node_modules/ts-node/src/bin.ts:55:10)",
+        "Object.<anonymous> (/Users/valentyne/Documents/code/qshelter/mreif/mofi-platform-api/infra/aws/node_modules/ts-node/src/bin.ts:800:3)",
+        "Module._compile (node:internal/modules/cjs/loader:1734:14)",
+        "Object..js (node:internal/modules/cjs/loader:1899:10)",
+        "Module.load (node:internal/modules/cjs/loader:1469:32)",
+        "Module._load (node:internal/modules/cjs/loader:1286:12)",
+        "TracingChannel.traceSync (node:diagnostics_channel:322:14)",
+        "wrapModuleLoad (node:internal/modules/cjs/loader:235:24)",
+        "Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:152:5)",
+        "node:internal/main/run_main_module:33:47"
+      ]
+    },
+    {
+      "type": "aws:cdk:warning",
+      "data": "minHealthyPercent has not been configured so the default value of 50% is used. The number of running tasks will decrease below the desired count during deployments etc. See https://github.com/aws/aws-cdk/issues/31705 [ack: @aws-cdk/aws-ecs:minHealthyPercent]",
+      "trace": [
+        "Annotations.addMessage (/Users/valentyne/Documents/code/qshelter/mreif/mofi-platform-api/infra/aws/node_modules/aws-cdk-lib/core/lib/annotations.js:1:3506)",
+        "Annotations.addWarningV2 (/Users/valentyne/Documents/code/qshelter/mreif/mofi-platform-api/infra/aws/node_modules/aws-cdk-lib/core/lib/annotations.js:1:2194)",
+        "new BaseService2 (/Users/valentyne/Documents/code/qshelter/mreif/mofi-platform-api/infra/aws/node_modules/aws-cdk-lib/aws-ecs/lib/base/base-service.js:1:16436)",
+        "new BaseService2 (/Users/valentyne/Documents/code/qshelter/mreif/mofi-platform-api/infra/aws/node_modules/aws-cdk-lib/core/lib/no-box-stack-traces.js:1:349)",
+        "new FargateService2 (/Users/valentyne/Documents/code/qshelter/mreif/mofi-platform-api/infra/aws/node_modules/aws-cdk-lib/aws-ecs/lib/fargate/fargate-service.js:1:8083)",
+        "new FargateService2 (/Users/valentyne/Documents/code/qshelter/mreif/mofi-platform-api/infra/aws/node_modules/aws-cdk-lib/core/lib/prop-injectable.js:1:861)",
+        "new MofiPlatformApiStack (/Users/valentyne/Documents/code/qshelter/mreif/mofi-platform-api/infra/aws/lib/mofi-platform-api-stack.ts:255:21)",
+        "Object.<anonymous> (/Users/valentyne/Documents/code/qshelter/mreif/mofi-platform-api/infra/aws/bin/mofi-platform-api.ts:13:1)",
+        "Module._compile (node:internal/modules/cjs/loader:1734:14)",
+        "Module.m._compile (/Users/valentyne/Documents/code/qshelter/mreif/mofi-platform-api/infra/aws/node_modules/ts-node/src/index.ts:1618:23)",
+        "loadTS (node:internal/modules/cjs/loader:1826:10)",
+        "Object.require.extensions.<computed> [as .ts] (/Users/valentyne/Documents/code/qshelter/mreif/mofi-platform-api/infra/aws/node_modules/ts-node/src/index.ts:1621:12)",
+        "Module.load (node:internal/modules/cjs/loader:1469:32)",
+        "Module._load (node:internal/modules/cjs/loader:1286:12)",
+        "TracingChannel.traceSync (node:diagnostics_channel:322:14)",
+        "wrapModuleLoad (node:internal/modules/cjs/loader:235:24)",
+        "Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:152:5)",
+        "phase4 (/Users/valentyne/Documents/code/qshelter/mreif/mofi-platform-api/infra/aws/node_modules/ts-node/src/bin.ts:649:14)",
+        "bootstrap (/Users/valentyne/Documents/code/qshelter/mreif/mofi-platform-api/infra/aws/node_modules/ts-node/src/bin.ts:95:10)",
+        "main (/Users/valentyne/Documents/code/qshelter/mreif/mofi-platform-api/infra/aws/node_modules/ts-node/src/bin.ts:55:10)",
+        "Object.<anonymous> (/Users/valentyne/Documents/code/qshelter/mreif/mofi-platform-api/infra/aws/node_modules/ts-node/src/bin.ts:800:3)",
+        "Module._compile (node:internal/modules/cjs/loader:1734:14)",
+        "Object..js (node:internal/modules/cjs/loader:1899:10)",
+        "Module.load (node:internal/modules/cjs/loader:1469:32)",
+        "Module._load (node:internal/modules/cjs/loader:1286:12)",
+        "TracingChannel.traceSync (node:diagnostics_channel:322:14)",
+        "wrapModuleLoad (node:internal/modules/cjs/loader:235:24)",
+        "Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:152:5)",
+        "node:internal/main/run_main_module:33:47"
+      ]
+    }
+  ],
+  "/MofiPlatformApi-dev/LoadBalancerDns": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "LoadBalancerDns"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "new MofiPlatformApiStack (/Users/valentyne/Documents/code/qshelter/mreif/mofi-platform-api/infra/aws/lib/mofi-platform-api-stack.ts:286:5)",
+        "<anonymous> (/Users/valentyne/Documents/code/qshelter/mreif/mofi-platform-api/infra/aws/bin/mofi-platform-api.ts:13:1)",
+        "...node internals, ts-node, ts-node..."
+      ]
+    }
+  ],
+  "/MofiPlatformApi-dev/EcrRepositoryUri": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "EcrRepositoryUri"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "new MofiPlatformApiStack (/Users/valentyne/Documents/code/qshelter/mreif/mofi-platform-api/infra/aws/lib/mofi-platform-api-stack.ts:287:5)",
+        "<anonymous> (/Users/valentyne/Documents/code/qshelter/mreif/mofi-platform-api/infra/aws/bin/mofi-platform-api.ts:13:1)",
+        "...node internals, ts-node, ts-node..."
+      ]
+    }
+  ],
+  "/MofiPlatformApi-dev/ClusterName": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "ClusterName"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "new MofiPlatformApiStack (/Users/valentyne/Documents/code/qshelter/mreif/mofi-platform-api/infra/aws/lib/mofi-platform-api-stack.ts:288:5)",
+        "<anonymous> (/Users/valentyne/Documents/code/qshelter/mreif/mofi-platform-api/infra/aws/bin/mofi-platform-api.ts:13:1)",
+        "...node internals, ts-node, ts-node..."
+      ]
+    }
+  ],
+  "/MofiPlatformApi-dev/SecretArn": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "SecretArn"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "new MofiPlatformApiStack (/Users/valentyne/Documents/code/qshelter/mreif/mofi-platform-api/infra/aws/lib/mofi-platform-api-stack.ts:289:5)",
+        "<anonymous> (/Users/valentyne/Documents/code/qshelter/mreif/mofi-platform-api/infra/aws/bin/mofi-platform-api.ts:13:1)",
+        "...node internals, ts-node, ts-node..."
+      ]
+    }
+  ],
+  "/MofiPlatformApi-dev/BrokerSecretArn": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "BrokerSecretArn"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "new MofiPlatformApiStack (/Users/valentyne/Documents/code/qshelter/mreif/mofi-platform-api/infra/aws/lib/mofi-platform-api-stack.ts:290:5)",
+        "<anonymous> (/Users/valentyne/Documents/code/qshelter/mreif/mofi-platform-api/infra/aws/bin/mofi-platform-api.ts:13:1)",
+        "...node internals, ts-node, ts-node..."
+      ]
+    }
+  ],
+  "/MofiPlatformApi-dev/DeploymentMode": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "DeploymentMode"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "new MofiPlatformApiStack (/Users/valentyne/Documents/code/qshelter/mreif/mofi-platform-api/infra/aws/lib/mofi-platform-api-stack.ts:291:5)",
+        "<anonymous> (/Users/valentyne/Documents/code/qshelter/mreif/mofi-platform-api/infra/aws/bin/mofi-platform-api.ts:13:1)",
+        "...node internals, ts-node, ts-node..."
+      ]
+    }
+  ],
+  "/MofiPlatformApi-dev/BootstrapVersion": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "BootstrapVersion"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...aws-cdk-lib...",
+        "(no user code in 10 frames, use --stack-trace-limit to capture more)"
+      ]
+    }
+  ],
+  "/MofiPlatformApi-dev/CheckBootstrapVersion": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "CheckBootstrapVersion"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...aws-cdk-lib...",
+        "(no user code in 10 frames, use --stack-trace-limit to capture more)"
+      ]
+    }
+  ],
+  "/MofiPlatformApi-dev/Vpc/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "Vpc8378EB38"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...new Vpc2 in aws-cdk-lib...",
+        "new MofiPlatformApiStack (/Users/valentyne/Documents/code/qshelter/mreif/mofi-platform-api/infra/aws/lib/mofi-platform-api-stack.ts:52:17)",
+        "<anonymous> (/Users/valentyne/Documents/code/qshelter/mreif/mofi-platform-api/infra/aws/bin/mofi-platform-api.ts:13:1)",
+        "...node internals, ts-node, ts-node..."
+      ]
+    }
+  ],
+  "/MofiPlatformApi-dev/Vpc/IGW": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "VpcIGWD7BA715C"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...new Vpc2 in aws-cdk-lib...",
+        "new MofiPlatformApiStack (/Users/valentyne/Documents/code/qshelter/mreif/mofi-platform-api/infra/aws/lib/mofi-platform-api-stack.ts:52:17)",
+        "<anonymous> (/Users/valentyne/Documents/code/qshelter/mreif/mofi-platform-api/infra/aws/bin/mofi-platform-api.ts:13:1)",
+        "...node internals, ts-node, ts-node..."
+      ]
+    }
+  ],
+  "/MofiPlatformApi-dev/Vpc/VPCGW": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "VpcVPCGWBF912B6E"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...new Vpc2 in aws-cdk-lib...",
+        "new MofiPlatformApiStack (/Users/valentyne/Documents/code/qshelter/mreif/mofi-platform-api/infra/aws/lib/mofi-platform-api-stack.ts:52:17)",
+        "<anonymous> (/Users/valentyne/Documents/code/qshelter/mreif/mofi-platform-api/infra/aws/bin/mofi-platform-api.ts:13:1)",
+        "...node internals, ts-node, ts-node..."
+      ]
+    }
+  ],
+  "/MofiPlatformApi-dev/Cluster/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "ClusterEB0386A7"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...new Cluster2 in aws-cdk-lib...",
+        "new MofiPlatformApiStack (/Users/valentyne/Documents/code/qshelter/mreif/mofi-platform-api/infra/aws/lib/mofi-platform-api-stack.ts:57:21)",
+        "<anonymous> (/Users/valentyne/Documents/code/qshelter/mreif/mofi-platform-api/infra/aws/bin/mofi-platform-api.ts:13:1)",
+        "...node internals, ts-node, ts-node..."
+      ]
+    }
+  ],
+  "/MofiPlatformApi-dev/AppSecret/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "AppSecretFAB5164C"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...new Secret2 in aws-cdk-lib...",
+        "new MofiPlatformApiStack (/Users/valentyne/Documents/code/qshelter/mreif/mofi-platform-api/infra/aws/lib/mofi-platform-api-stack.ts:69:23)",
+        "<anonymous> (/Users/valentyne/Documents/code/qshelter/mreif/mofi-platform-api/infra/aws/bin/mofi-platform-api.ts:13:1)",
+        "...node internals, ts-node, ts-node..."
+      ]
+    }
+  ],
+  "/MofiPlatformApi-dev/BrokerSecret/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "BrokerSecret123CAC7B"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...new Secret2 in aws-cdk-lib...",
+        "new MofiPlatformApiStack (/Users/valentyne/Documents/code/qshelter/mreif/mofi-platform-api/infra/aws/lib/mofi-platform-api-stack.ts:87:26)",
+        "<anonymous> (/Users/valentyne/Documents/code/qshelter/mreif/mofi-platform-api/infra/aws/bin/mofi-platform-api.ts:13:1)",
+        "...node internals, ts-node, ts-node..."
+      ]
+    }
+  ],
+  "/MofiPlatformApi-dev/ApiLogGroup/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "ApiLogGroup1DEDFC07"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...new LogGroup2 in aws-cdk-lib...",
+        "new MofiPlatformApiStack (/Users/valentyne/Documents/code/qshelter/mreif/mofi-platform-api/infra/aws/lib/mofi-platform-api-stack.ts:97:22)",
+        "<anonymous> (/Users/valentyne/Documents/code/qshelter/mreif/mofi-platform-api/infra/aws/bin/mofi-platform-api.ts:13:1)",
+        "...node internals, ts-node, ts-node..."
+      ]
+    }
+  ],
+  "/MofiPlatformApi-dev/TaskSecurityGroup/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "TaskSecurityGroup2D2EA438"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...new SecurityGroup2 in aws-cdk-lib...",
+        "new MofiPlatformApiStack (/Users/valentyne/Documents/code/qshelter/mreif/mofi-platform-api/infra/aws/lib/mofi-platform-api-stack.ts:103:20)",
+        "<anonymous> (/Users/valentyne/Documents/code/qshelter/mreif/mofi-platform-api/infra/aws/bin/mofi-platform-api.ts:13:1)",
+        "...node internals, ts-node, ts-node..."
+      ]
+    }
+  ],
+  "/MofiPlatformApi-dev/TaskSecurityGroup/from MofiPlatformApidevAlbSecurityGroup77851447:8080": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "TaskSecurityGroupfromMofiPlatformApidevAlbSecurityGroup77851447808026D7B5AE"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...aws-cdk-lib...",
+        "(no user code in 10 frames, use --stack-trace-limit to capture more)"
+      ]
+    }
+  ],
+  "/MofiPlatformApi-dev/BrokerSecurityGroup/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "BrokerSecurityGroup40A43BB1"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...new SecurityGroup2 in aws-cdk-lib...",
+        "new MofiPlatformApiStack (/Users/valentyne/Documents/code/qshelter/mreif/mofi-platform-api/infra/aws/lib/mofi-platform-api-stack.ts:109:22)",
+        "<anonymous> (/Users/valentyne/Documents/code/qshelter/mreif/mofi-platform-api/infra/aws/bin/mofi-platform-api.ts:13:1)",
+        "...node internals, ts-node, ts-node..."
+      ]
+    }
+  ],
+  "/MofiPlatformApi-dev/BrokerSecurityGroup/from MofiPlatformApidevTaskSecurityGroup3CACD58B:5671": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "BrokerSecurityGroupfromMofiPlatformApidevTaskSecurityGroup3CACD58B56716D167776"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...PropertyInjectable.<anonymous> in aws-cdk-lib...",
+        "new MofiPlatformApiStack (/Users/valentyne/Documents/code/qshelter/mreif/mofi-platform-api/infra/aws/lib/mofi-platform-api-stack.ts:114:14)",
+        "<anonymous> (/Users/valentyne/Documents/code/qshelter/mreif/mofi-platform-api/infra/aws/bin/mofi-platform-api.ts:13:1)",
+        "...node internals, ts-node, ts-node..."
+      ]
+    }
+  ],
+  "/MofiPlatformApi-dev/BrokerSecurityGroup/from MofiPlatformApidevTaskSecurityGroup3CACD58B:5672": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "BrokerSecurityGroupfromMofiPlatformApidevTaskSecurityGroup3CACD58B56725FA13A16"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...PropertyInjectable.<anonymous> in aws-cdk-lib...",
+        "new MofiPlatformApiStack (/Users/valentyne/Documents/code/qshelter/mreif/mofi-platform-api/infra/aws/lib/mofi-platform-api-stack.ts:115:14)",
+        "<anonymous> (/Users/valentyne/Documents/code/qshelter/mreif/mofi-platform-api/infra/aws/bin/mofi-platform-api.ts:13:1)",
+        "...node internals, ts-node, ts-node..."
+      ]
+    }
+  ],
+  "/MofiPlatformApi-dev/TaskRole/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "TaskRole30FC0FBB"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...new Role2 in aws-cdk-lib...",
+        "new MofiPlatformApiStack (/Users/valentyne/Documents/code/qshelter/mreif/mofi-platform-api/infra/aws/lib/mofi-platform-api-stack.ts:135:22)",
+        "<anonymous> (/Users/valentyne/Documents/code/qshelter/mreif/mofi-platform-api/infra/aws/bin/mofi-platform-api.ts:13:1)",
+        "...node internals, ts-node, ts-node..."
+      ]
+    }
+  ],
+  "/MofiPlatformApi-dev/TaskDef/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "TaskDef54694570"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...new FargateTaskDefinition2 in aws-cdk-lib...",
+        "new MofiPlatformApiStack (/Users/valentyne/Documents/code/qshelter/mreif/mofi-platform-api/infra/aws/lib/mofi-platform-api-stack.ts:155:28)",
+        "<anonymous> (/Users/valentyne/Documents/code/qshelter/mreif/mofi-platform-api/infra/aws/bin/mofi-platform-api.ts:13:1)",
+        "...node internals, ts-node, ts-node..."
+      ]
+    }
+  ],
+  "/MofiPlatformApi-dev/Service/Service": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "ServiceD69D759B"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...new FargateService2 in aws-cdk-lib...",
+        "new MofiPlatformApiStack (/Users/valentyne/Documents/code/qshelter/mreif/mofi-platform-api/infra/aws/lib/mofi-platform-api-stack.ts:255:21)",
+        "<anonymous> (/Users/valentyne/Documents/code/qshelter/mreif/mofi-platform-api/infra/aws/bin/mofi-platform-api.ts:13:1)",
+        "...node internals, ts-node, ts-node..."
+      ]
+    }
+  ],
+  "/MofiPlatformApi-dev/Alb/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "Alb16C2F182"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...new ApplicationLoadBalancer2 in aws-cdk-lib...",
+        "new MofiPlatformApiStack (/Users/valentyne/Documents/code/qshelter/mreif/mofi-platform-api/infra/aws/lib/mofi-platform-api-stack.ts:265:17)",
+        "<anonymous> (/Users/valentyne/Documents/code/qshelter/mreif/mofi-platform-api/infra/aws/bin/mofi-platform-api.ts:13:1)",
+        "...node internals, ts-node, ts-node..."
+      ]
+    }
+  ],
+  "/MofiPlatformApi-dev/CDKMetadata/Default": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "CDKMetadata"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...aws-cdk-lib, node internals...",
+        "(no user code in 10 frames, use --stack-trace-limit to capture more)"
+      ]
+    }
+  ],
+  "/MofiPlatformApi-dev/Vpc/PublicSubnet1/Subnet": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "VpcPublicSubnet1Subnet5C2D37C4"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        ".../Users/valentyne/Documents/code/qshelter/mreif/mofi-platform-api/infra/aws/node_modules/aws-cdk-lib/aws-ec2/lib/vpc.js:1:287 in aws-cdk-lib...",
+        "Array.forEach (:)",
+        "...aws-cdk-lib..."
+      ]
+    }
+  ],
+  "/MofiPlatformApi-dev/Vpc/PublicSubnet1/RouteTable": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "VpcPublicSubnet1RouteTable6C95E38E"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        ".../Users/valentyne/Documents/code/qshelter/mreif/mofi-platform-api/infra/aws/node_modules/aws-cdk-lib/aws-ec2/lib/vpc.js:1:287 in aws-cdk-lib...",
+        "Array.forEach (:)",
+        "...aws-cdk-lib..."
+      ]
+    }
+  ],
+  "/MofiPlatformApi-dev/Vpc/PublicSubnet1/RouteTableAssociation": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "VpcPublicSubnet1RouteTableAssociation97140677"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        ".../Users/valentyne/Documents/code/qshelter/mreif/mofi-platform-api/infra/aws/node_modules/aws-cdk-lib/aws-ec2/lib/vpc.js:1:287 in aws-cdk-lib...",
+        "Array.forEach (:)",
+        "...aws-cdk-lib..."
+      ]
+    }
+  ],
+  "/MofiPlatformApi-dev/Vpc/PublicSubnet1/DefaultRoute": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "VpcPublicSubnet1DefaultRoute3DA9E72A"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        ".../Users/valentyne/Documents/code/qshelter/mreif/mofi-platform-api/infra/aws/node_modules/aws-cdk-lib/aws-ec2/lib/vpc.js:1:225 in aws-cdk-lib...",
+        "Array.forEach (:)",
+        "...new Vpc2 in aws-cdk-lib...",
+        "new MofiPlatformApiStack (/Users/valentyne/Documents/code/qshelter/mreif/mofi-platform-api/infra/aws/lib/mofi-platform-api-stack.ts:52:17)",
+        "<anonymous> (/Users/valentyne/Documents/code/qshelter/mreif/mofi-platform-api/infra/aws/bin/mofi-platform-api.ts:13:1)",
+        "...node internals, ts-node..."
+      ]
+    }
+  ],
+  "/MofiPlatformApi-dev/Vpc/PublicSubnet1/EIP": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "VpcPublicSubnet1EIPD7E02669"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...new Vpc2 in aws-cdk-lib...",
+        "new MofiPlatformApiStack (/Users/valentyne/Documents/code/qshelter/mreif/mofi-platform-api/infra/aws/lib/mofi-platform-api-stack.ts:52:17)",
+        "<anonymous> (/Users/valentyne/Documents/code/qshelter/mreif/mofi-platform-api/infra/aws/bin/mofi-platform-api.ts:13:1)",
+        "...node internals, ts-node..."
+      ]
+    }
+  ],
+  "/MofiPlatformApi-dev/Vpc/PublicSubnet1/NATGateway": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "VpcPublicSubnet1NATGateway4D7517AA"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...new Vpc2 in aws-cdk-lib...",
+        "new MofiPlatformApiStack (/Users/valentyne/Documents/code/qshelter/mreif/mofi-platform-api/infra/aws/lib/mofi-platform-api-stack.ts:52:17)",
+        "<anonymous> (/Users/valentyne/Documents/code/qshelter/mreif/mofi-platform-api/infra/aws/bin/mofi-platform-api.ts:13:1)",
+        "...node internals, ts-node..."
+      ]
+    }
+  ],
+  "/MofiPlatformApi-dev/Vpc/PublicSubnet2/Subnet": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "VpcPublicSubnet2Subnet691E08A3"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        ".../Users/valentyne/Documents/code/qshelter/mreif/mofi-platform-api/infra/aws/node_modules/aws-cdk-lib/aws-ec2/lib/vpc.js:1:287 in aws-cdk-lib...",
+        "Array.forEach (:)",
+        "...aws-cdk-lib..."
+      ]
+    }
+  ],
+  "/MofiPlatformApi-dev/Vpc/PublicSubnet2/RouteTable": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "VpcPublicSubnet2RouteTable94F7E489"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        ".../Users/valentyne/Documents/code/qshelter/mreif/mofi-platform-api/infra/aws/node_modules/aws-cdk-lib/aws-ec2/lib/vpc.js:1:287 in aws-cdk-lib...",
+        "Array.forEach (:)",
+        "...aws-cdk-lib..."
+      ]
+    }
+  ],
+  "/MofiPlatformApi-dev/Vpc/PublicSubnet2/RouteTableAssociation": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "VpcPublicSubnet2RouteTableAssociationDD5762D8"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        ".../Users/valentyne/Documents/code/qshelter/mreif/mofi-platform-api/infra/aws/node_modules/aws-cdk-lib/aws-ec2/lib/vpc.js:1:287 in aws-cdk-lib...",
+        "Array.forEach (:)",
+        "...aws-cdk-lib..."
+      ]
+    }
+  ],
+  "/MofiPlatformApi-dev/Vpc/PublicSubnet2/DefaultRoute": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "VpcPublicSubnet2DefaultRoute97F91067"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        ".../Users/valentyne/Documents/code/qshelter/mreif/mofi-platform-api/infra/aws/node_modules/aws-cdk-lib/aws-ec2/lib/vpc.js:1:225 in aws-cdk-lib...",
+        "Array.forEach (:)",
+        "...new Vpc2 in aws-cdk-lib...",
+        "new MofiPlatformApiStack (/Users/valentyne/Documents/code/qshelter/mreif/mofi-platform-api/infra/aws/lib/mofi-platform-api-stack.ts:52:17)",
+        "<anonymous> (/Users/valentyne/Documents/code/qshelter/mreif/mofi-platform-api/infra/aws/bin/mofi-platform-api.ts:13:1)",
+        "...node internals, ts-node..."
+      ]
+    }
+  ],
+  "/MofiPlatformApi-dev/Vpc/PrivateSubnet1/Subnet": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "VpcPrivateSubnet1Subnet536B997A"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        ".../Users/valentyne/Documents/code/qshelter/mreif/mofi-platform-api/infra/aws/node_modules/aws-cdk-lib/aws-ec2/lib/vpc.js:1:289 in aws-cdk-lib...",
+        "Array.forEach (:)",
+        "...aws-cdk-lib..."
+      ]
+    }
+  ],
+  "/MofiPlatformApi-dev/Vpc/PrivateSubnet1/RouteTable": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "VpcPrivateSubnet1RouteTableB2C5B500"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        ".../Users/valentyne/Documents/code/qshelter/mreif/mofi-platform-api/infra/aws/node_modules/aws-cdk-lib/aws-ec2/lib/vpc.js:1:289 in aws-cdk-lib...",
+        "Array.forEach (:)",
+        "...aws-cdk-lib..."
+      ]
+    }
+  ],
+  "/MofiPlatformApi-dev/Vpc/PrivateSubnet1/RouteTableAssociation": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "VpcPrivateSubnet1RouteTableAssociation70C59FA6"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        ".../Users/valentyne/Documents/code/qshelter/mreif/mofi-platform-api/infra/aws/node_modules/aws-cdk-lib/aws-ec2/lib/vpc.js:1:289 in aws-cdk-lib...",
+        "Array.forEach (:)",
+        "...aws-cdk-lib..."
+      ]
+    }
+  ],
+  "/MofiPlatformApi-dev/Vpc/PrivateSubnet1/DefaultRoute": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "VpcPrivateSubnet1DefaultRouteBE02A9ED"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...new Vpc2 in aws-cdk-lib...",
+        "new MofiPlatformApiStack (/Users/valentyne/Documents/code/qshelter/mreif/mofi-platform-api/infra/aws/lib/mofi-platform-api-stack.ts:52:17)",
+        "<anonymous> (/Users/valentyne/Documents/code/qshelter/mreif/mofi-platform-api/infra/aws/bin/mofi-platform-api.ts:13:1)",
+        "...node internals..."
+      ]
+    }
+  ],
+  "/MofiPlatformApi-dev/Vpc/PrivateSubnet2/Subnet": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "VpcPrivateSubnet2Subnet3788AAA1"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        ".../Users/valentyne/Documents/code/qshelter/mreif/mofi-platform-api/infra/aws/node_modules/aws-cdk-lib/aws-ec2/lib/vpc.js:1:289 in aws-cdk-lib...",
+        "Array.forEach (:)",
+        "...aws-cdk-lib..."
+      ]
+    }
+  ],
+  "/MofiPlatformApi-dev/Vpc/PrivateSubnet2/RouteTable": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "VpcPrivateSubnet2RouteTableA678073B"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        ".../Users/valentyne/Documents/code/qshelter/mreif/mofi-platform-api/infra/aws/node_modules/aws-cdk-lib/aws-ec2/lib/vpc.js:1:289 in aws-cdk-lib...",
+        "Array.forEach (:)",
+        "...aws-cdk-lib..."
+      ]
+    }
+  ],
+  "/MofiPlatformApi-dev/Vpc/PrivateSubnet2/RouteTableAssociation": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "VpcPrivateSubnet2RouteTableAssociationA89CAD56"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        ".../Users/valentyne/Documents/code/qshelter/mreif/mofi-platform-api/infra/aws/node_modules/aws-cdk-lib/aws-ec2/lib/vpc.js:1:289 in aws-cdk-lib...",
+        "Array.forEach (:)",
+        "...aws-cdk-lib..."
+      ]
+    }
+  ],
+  "/MofiPlatformApi-dev/Vpc/PrivateSubnet2/DefaultRoute": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "VpcPrivateSubnet2DefaultRoute060D2087"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...new Vpc2 in aws-cdk-lib...",
+        "new MofiPlatformApiStack (/Users/valentyne/Documents/code/qshelter/mreif/mofi-platform-api/infra/aws/lib/mofi-platform-api-stack.ts:52:17)",
+        "<anonymous> (/Users/valentyne/Documents/code/qshelter/mreif/mofi-platform-api/infra/aws/bin/mofi-platform-api.ts:13:1)",
+        "...node internals..."
+      ]
+    }
+  ],
+  "/MofiPlatformApi-dev/TaskRole/DefaultPolicy/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "TaskRoleDefaultPolicy07FC53DE"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...PropertyInjectable.grantRead in aws-cdk-lib...",
+        "new MofiPlatformApiStack (/Users/valentyne/Documents/code/qshelter/mreif/mofi-platform-api/infra/aws/lib/mofi-platform-api-stack.ts:139:15)",
+        "<anonymous> (/Users/valentyne/Documents/code/qshelter/mreif/mofi-platform-api/infra/aws/bin/mofi-platform-api.ts:13:1)"
+      ]
+    }
+  ],
+  "/MofiPlatformApi-dev/TaskDef/ExecutionRole/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "TaskDefExecutionRoleB4775C97"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...aws-cdk-lib...",
+        "(no user code in 10 frames, use --stack-trace-limit to capture more)"
+      ]
+    }
+  ],
+  "/MofiPlatformApi-dev/Alb/SecurityGroup/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "AlbSecurityGroup580F65A6"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...new ApplicationLoadBalancer2 in aws-cdk-lib...",
+        "new MofiPlatformApiStack (/Users/valentyne/Documents/code/qshelter/mreif/mofi-platform-api/infra/aws/lib/mofi-platform-api-stack.ts:265:17)",
+        "<anonymous> (/Users/valentyne/Documents/code/qshelter/mreif/mofi-platform-api/infra/aws/bin/mofi-platform-api.ts:13:1)",
+        "...node internals, ts-node..."
+      ]
+    }
+  ],
+  "/MofiPlatformApi-dev/Alb/SecurityGroup/to MofiPlatformApidevTaskSecurityGroup3CACD58B:8080": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "AlbSecurityGrouptoMofiPlatformApidevTaskSecurityGroup3CACD58B80807C5E9870"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...aws-cdk-lib...",
+        "(no user code in 10 frames, use --stack-trace-limit to capture more)"
+      ]
+    }
+  ],
+  "/MofiPlatformApi-dev/Alb/HttpListener/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "AlbHttpListener00C8B33E"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...PropertyInjectable.<anonymous> in aws-cdk-lib...",
+        "new MofiPlatformApiStack (/Users/valentyne/Documents/code/qshelter/mreif/mofi-platform-api/infra/aws/lib/mofi-platform-api-stack.ts:271:26)",
+        "<anonymous> (/Users/valentyne/Documents/code/qshelter/mreif/mofi-platform-api/infra/aws/bin/mofi-platform-api.ts:13:1)",
+        "...node internals..."
+      ]
+    }
+  ],
+  "/MofiPlatformApi-dev/TaskDef/ExecutionRole/DefaultPolicy/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "TaskDefExecutionRoleDefaultPolicy0DBB737A"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...aws-cdk-lib...",
+        "(no user code in 10 frames, use --stack-trace-limit to capture more)"
+      ]
+    }
+  ],
+  "/MofiPlatformApi-dev/Alb/HttpListener/EcsTargetGroup/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "AlbHttpListenerEcsTargetGroupE020E009"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...PropertyInjectable.<anonymous> in aws-cdk-lib...",
+        "new MofiPlatformApiStack (/Users/valentyne/Documents/code/qshelter/mreif/mofi-platform-api/infra/aws/lib/mofi-platform-api-stack.ts:276:14)",
+        "<anonymous> (/Users/valentyne/Documents/code/qshelter/mreif/mofi-platform-api/infra/aws/bin/mofi-platform-api.ts:13:1)",
+        "...node internals, ts-node..."
+      ]
+    }
+  ]
+}
