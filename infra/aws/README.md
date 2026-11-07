@@ -32,8 +32,8 @@ Populate secrets:
 
 Deploy modes:
 
-- `npx cdk deploy -c stage=dev` — multi-container Fargate (edge + domains + worker)
-- `npx cdk deploy -c stage=dev -c deploymentMode=monolith` — single monolith container
+- `npx cdk deploy -c stage=dev` — **monolith** Fargate + RDS MySQL (default for dev; fits one task)
+- `npx cdk deploy -c stage=dev -c deploymentMode=multicontainer` — 8-container task (needs large Fargate size)
 
 Cutover runbook: [CUTOVER.md](./CUTOVER.md)
 

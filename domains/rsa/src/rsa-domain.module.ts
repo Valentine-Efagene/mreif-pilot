@@ -5,8 +5,6 @@ import { buildTypeOrmOptions } from '../../../libs/database/src/typeorm-options'
 import { RSA_CONNECTION, RSA_ENTITIES } from '../../../libs/database/src/domain-entities/rsa.entities';
 import { UserModule } from './user/user.module';
 import { User } from './user/user.entity';
-import { UserService } from './user/user.service';
-import { UserRepository } from './user/user.repository';
 import { CommonModule } from './common/common.module';
 import { RsaModule } from './rsa/rsa.module';
 import { NotificationModule } from './notification/notification.module';
@@ -36,7 +34,7 @@ import { RsaLegacyApiController } from './rsa/rsa-legacy-api.controller';
     CommonModule,
   ],
   controllers: [AppController, RsaLegacyApiController],
-  providers: [AppService, UserService, UserRepository],
+  providers: [AppService],
 })
 export class RsaDomainModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {

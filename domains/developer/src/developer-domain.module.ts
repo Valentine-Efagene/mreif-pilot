@@ -10,8 +10,6 @@ import { UserModule } from './user/user.module';
 import { User } from './user/user.entity';
 import { DeveloperModule } from './developer/developer.module';
 import { ProposedDevelopmentModule } from './proposed-development/proposed-development.module';
-import { UserService } from './user/user.service';
-import { UserRepository } from './user/user.repository';
 import { DeveloperPocModule } from './developer-poc/developer-poc.module';
 import { DeveloperDirectorModule } from './developer-director/developer-director.module';
 import { DeveloperDocumentModule } from './developer-document/developer-document.module';
@@ -58,11 +56,7 @@ import { AppService } from './app.service';
     AuthModule,
   ],
   controllers: [AppController],
-  providers: [
-    AppService,
-    UserService,
-    UserRepository,
-  ],
+  providers: [AppService],
 })
 export class DeveloperDomainModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {

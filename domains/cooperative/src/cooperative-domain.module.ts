@@ -8,8 +8,6 @@ import {
 } from '../../../libs/database/src/domain-entities/cooperative.entities';
 import { UserModule } from './user/user.module';
 import { User } from './user/user.entity';
-import { UserService } from './user/user.service';
-import { UserRepository } from './user/user.repository';
 import { S3UploaderModule } from './s3-uploader/s3-uploader.module';
 import { CommonModule } from './common/common.module';
 import { CooperativeModule } from './cooperative/cooperative.module';
@@ -38,11 +36,7 @@ import { AppService } from './app.service';
     AuthModule,
   ],
   controllers: [AppController],
-  providers: [
-    AppService,
-    UserService,
-    UserRepository,
-  ],
+  providers: [AppService],
 })
 export class CooperativeDomainModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {

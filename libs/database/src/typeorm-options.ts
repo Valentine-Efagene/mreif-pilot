@@ -19,7 +19,9 @@ export function buildTypeOrmOptions(
     password: config.get<string>('DB_PASSWORD', ''),
     database: config.get<string>('DB_NAME', 'qshelter-dev'),
     entities,
-    synchronize: isLocal && config.get('NODE_ENV') !== 'production',
+    synchronize:
+      config.get('TYPEORM_SYNCHRONIZE') === 'true' ||
+      (isLocal && config.get('NODE_ENV') !== 'production'),
     namingStrategy: new CustomNamingStrategy(),
     logging: config.get('TYPEORM_LOGGING') === 'true',
   };

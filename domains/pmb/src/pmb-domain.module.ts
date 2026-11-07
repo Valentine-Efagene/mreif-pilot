@@ -5,8 +5,6 @@ import { buildTypeOrmOptions } from '../../../libs/database/src/typeorm-options'
 import { PMB_CONNECTION, PMB_ENTITIES } from '../../../libs/database/src/domain-entities/pmb.entities';
 import { UserModule } from './user/user.module';
 import { User } from './user/user.entity';
-import { UserService } from './user/user.service';
-import { UserRepository } from './user/user.repository';
 import { S3UploaderModule } from './s3-uploader/s3-uploader.module';
 import { CommonModule } from './common/common.module';
 import { PmbModule } from './pmb/pmb.module';
@@ -37,11 +35,7 @@ import { AppService } from './app.service';
     MortgageApplicantModule,
   ],
   controllers: [AppController],
-  providers: [
-    AppService,
-    UserService,
-    UserRepository,
-  ],
+  providers: [AppService],
 })
 export class PmbDomainModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {

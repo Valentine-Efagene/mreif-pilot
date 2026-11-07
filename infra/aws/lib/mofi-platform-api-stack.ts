@@ -7,7 +7,11 @@ import * as logs from 'aws-cdk-lib/aws-logs';
 import * as iam from 'aws-cdk-lib/aws-iam';
 import * as secretsmanager from 'aws-cdk-lib/aws-secretsmanager';
 import * as amazonmq from 'aws-cdk-lib/aws-amazonmq';
+import * as rds from 'aws-cdk-lib/aws-rds';
 import { Construct } from 'constructs';
+
+/** Initial schema name (RDS allows alphanumeric only; app default is qshelter-dev locally). */
+const RDS_DATABASE_NAME = 'qshelterdev';
 
 export interface MofiPlatformApiStackProps extends cdk.StackProps {
   stage: string;
@@ -46,8 +50,10 @@ export class MofiPlatformApiStack extends cdk.Stack {
     super(scope, id, props);
 
     const { stage } = props;
+    // dev: one task (fits Fargate); staging/main: multicontainer via -c deploymentMode=multicontainer
     const deploymentMode =
-      this.node.tryGetContext('deploymentMode') ?? 'multicontainer';
+      this.node.tryGetContext('deploymentMode') ??
+      (stage === 'dev' ? 'monolith' : 'multicontainer');
 
     const vpc = new ec2.Vpc(this, 'Vpc', {
       maxAzs: 2,
@@ -68,20 +74,38 @@ export class MofiPlatformApiStack extends cdk.Stack {
 
     const appSecret = new secretsmanager.Secret(this, 'AppSecret', {
       secretName: `mofi-platform-api/${stage}/app`,
-      description: 'DB, JWT, and broker credentials for MOFI platform API',
+      description: 'JWT and app credentials for MOFI platform API (DB from RDS secret)',
       generateSecretString: {
-        // ECS task definition expects these JSON keys (populate after deploy).
         secretStringTemplate: JSON.stringify({
-          DB_HOST: '',
-          DB_PORT: '3306',
-          DB_USERNAME: '',
-          DB_PASSWORD: '',
-          DB_NAME: '',
           AMQP_USERNAME: 'mofi',
         }),
         generateStringKey: 'JWT_SECRET',
         excludePunctuation: true,
       },
+    });
+
+    const database = new rds.DatabaseInstance(this, 'Database', {
+      engine: rds.DatabaseInstanceEngine.mysql({
+        version: rds.MysqlEngineVersion.VER_8_4_10,
+      }),
+      instanceType:
+        stage === 'main'
+          ? ec2.InstanceType.of(ec2.InstanceClass.T3, ec2.InstanceSize.SMALL)
+          : ec2.InstanceType.of(ec2.InstanceClass.T4G, ec2.InstanceSize.MICRO),
+      vpc,
+      vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS },
+      credentials: rds.Credentials.fromGeneratedSecret('mofiadmin', {
+        secretName: `mofi-platform-api/${stage}/db`,
+      }),
+      databaseName: RDS_DATABASE_NAME,
+      storageEncrypted: true,
+      allocatedStorage: 20,
+      maxAllocatedStorage: 100,
+      publiclyAccessible: false,
+      removalPolicy:
+        stage === 'main' ? cdk.RemovalPolicy.SNAPSHOT : cdk.RemovalPolicy.DESTROY,
+      deletionProtection: stage === 'main',
+      backupRetention: cdk.Duration.days(stage === 'main' ? 7 : 1),
     });
 
     const brokerSecret = new secretsmanager.Secret(this, 'BrokerSecret', {
@@ -105,6 +129,8 @@ export class MofiPlatformApiStack extends cdk.Stack {
       description: 'MOFI platform ECS tasks',
       allowAllOutbound: true,
     });
+
+    database.connections.allowDefaultPortFrom(taskSg);
 
     const brokerSg = new ec2.SecurityGroup(this, 'BrokerSecurityGroup', {
       vpc,
@@ -138,6 +164,10 @@ export class MofiPlatformApiStack extends cdk.Stack {
 
     appSecret.grantRead(taskRole);
     brokerSecret.grantRead(taskRole);
+    const dbSecret = database.secret;
+    if (dbSecret) {
+      dbSecret.grantRead(taskRole);
+    }
     taskRole.addToPolicy(
       new iam.PolicyStatement({
         actions: ['s3:GetObject', 's3:PutObject', 's3:DeleteObject'],
@@ -153,8 +183,9 @@ export class MofiPlatformApiStack extends cdk.Stack {
 
     const isMulti = deploymentMode === 'multicontainer';
     const taskDefinition = new ecs.FargateTaskDefinition(this, 'TaskDef', {
-      memoryLimitMiB: isMulti ? 4096 : 1024,
-      cpu: isMulti ? 2048 : 512,
+      // Eight Nest processes on one task; 4 GiB was tight (exit 137).
+      memoryLimitMiB: isMulti ? 16384 : 4096,
+      cpu: isMulti ? 4096 : 1024,
       taskRole,
     });
 
@@ -167,17 +198,21 @@ export class MofiPlatformApiStack extends cdk.Stack {
       MESSAGING_ENABLED: 'true',
       NOTIFICATION_MODE: 'async',
       LAMBDA_INVOKE_MODE: 'async',
+      TYPEORM_SYNCHRONIZE: stage === 'main' ? 'false' : 'true',
       AMQP_VHOST: '/',
       AMQP_USERNAME: 'mofi',
       AMQP_URL: cdk.Token.asString(cdk.Fn.select(0, broker.attrAmqpEndpoints)),
     };
 
+    if (!dbSecret) {
+      throw new Error('RDS instance secret is required for ECS database configuration');
+    }
+
     const sharedSecrets: Record<string, ecs.Secret> = {
-      DB_HOST: ecs.Secret.fromSecretsManager(appSecret, 'DB_HOST'),
-      DB_PORT: ecs.Secret.fromSecretsManager(appSecret, 'DB_PORT'),
-      DB_USERNAME: ecs.Secret.fromSecretsManager(appSecret, 'DB_USERNAME'),
-      DB_PASSWORD: ecs.Secret.fromSecretsManager(appSecret, 'DB_PASSWORD'),
-      DB_NAME: ecs.Secret.fromSecretsManager(appSecret, 'DB_NAME'),
+      DB_HOST: ecs.Secret.fromSecretsManager(dbSecret, 'host'),
+      DB_PORT: ecs.Secret.fromSecretsManager(dbSecret, 'port'),
+      DB_USERNAME: ecs.Secret.fromSecretsManager(dbSecret, 'username'),
+      DB_PASSWORD: ecs.Secret.fromSecretsManager(dbSecret, 'password'),
       JWT_SECRET: ecs.Secret.fromSecretsManager(appSecret, 'JWT_SECRET'),
       AMQP_PASSWORD: ecs.Secret.fromSecretsManager(brokerSecret, 'password'),
     };
@@ -199,6 +234,7 @@ export class MofiPlatformApiStack extends cdk.Stack {
           ...sharedEnvironment,
           MOFI_CONTAINER_ROLE: role,
           PORT: String(port),
+          DB_NAME: RDS_DATABASE_NAME,
           ...extraEnv,
         },
         secrets: sharedSecrets,
@@ -210,7 +246,7 @@ export class MofiPlatformApiStack extends cdk.Stack {
           interval: cdk.Duration.seconds(30),
           timeout: cdk.Duration.seconds(5),
           retries: 3,
-          startPeriod: cdk.Duration.seconds(90),
+          startPeriod: cdk.Duration.seconds(180),
         },
       });
       if (exposePort) {
@@ -258,9 +294,12 @@ export class MofiPlatformApiStack extends cdk.Stack {
       desiredCount: stage === 'main' ? 2 : 1,
       assignPublicIp: true,
       securityGroups: [taskSg],
+      circuitBreaker: { rollback: true },
+      healthCheckGracePeriod: cdk.Duration.seconds(300),
     });
 
     service.node.addDependency(broker);
+    service.node.addDependency(database);
 
     const alb = new elbv2.ApplicationLoadBalancer(this, 'Alb', {
       vpc,
@@ -287,6 +326,8 @@ export class MofiPlatformApiStack extends cdk.Stack {
     new cdk.CfnOutput(this, 'EcrRepositoryUri', { value: repository.repositoryUri });
     new cdk.CfnOutput(this, 'ClusterName', { value: cluster.clusterName });
     new cdk.CfnOutput(this, 'SecretArn', { value: appSecret.secretArn });
+    new cdk.CfnOutput(this, 'DbSecretArn', { value: dbSecret.secretArn });
+    new cdk.CfnOutput(this, 'DbEndpoint', { value: database.dbInstanceEndpointAddress });
     new cdk.CfnOutput(this, 'BrokerSecretArn', { value: brokerSecret.secretArn });
     new cdk.CfnOutput(this, 'DeploymentMode', { value: deploymentMode });
   }
