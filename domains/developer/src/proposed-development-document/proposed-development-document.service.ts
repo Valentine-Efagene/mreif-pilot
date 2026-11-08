@@ -1,5 +1,5 @@
 import { BadRequestException, forwardRef, Inject, Injectable, NotFoundException } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
+import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
 import { ProposedDevelopmentDocument } from './proposed-development-document.entity';
 import {
@@ -28,6 +28,7 @@ export class ProposedDevelopmentDocumentService {
 
     private readonly uploaderService: S3UploaderService,
     private readonly proposedDevelopmentService: ProposedDevelopmentService,
+    @InjectDataSource('developer')
     private dataSource: DataSource,
   ) { }
 

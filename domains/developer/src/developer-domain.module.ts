@@ -31,6 +31,7 @@ import { AppService } from './app.service';
 @Module({
   imports: [
     TypeOrmModule.forRootAsync({
+      name: DEVELOPER_CONNECTION,
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: (config: ConfigService) =>

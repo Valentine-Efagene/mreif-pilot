@@ -22,6 +22,7 @@ import { HealthController } from './health/health.controller';
 @Module({
   imports: [
     TypeOrmModule.forRootAsync({
+      name: AGENT_CONNECTION,
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: (config: ConfigService) =>

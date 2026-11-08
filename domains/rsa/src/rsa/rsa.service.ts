@@ -1,5 +1,5 @@
 import { BadRequestException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
+import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
 import { PaginatedRsa } from './rsa.type';
 import { Rsa } from './rsa.entity';
@@ -36,6 +36,7 @@ export class RsaService {
 
     private notificationService: NotificationService,
     private mortgageService: MortgageService,
+    @InjectDataSource('rsa')
     private dataSource: DataSource,
   ) {
     this.app = TypeHelper.toEnum(App, process.env.APP)

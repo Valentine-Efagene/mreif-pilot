@@ -15,7 +15,7 @@ export abstract class AbstractBaseReviewableEntity extends AbstractBaseEntity {
   @Column({ nullable: true })
   reviewedBy: number;
 
-  @Column({ type: 'timestamp', nullable: true })
+  @Column({ type: 'datetime', precision: 6, nullable: true })
   reviewedAt: string;
 }
 

@@ -1,5 +1,5 @@
 import { BadRequestException, Injectable, Logger, NotFoundException, UnprocessableEntityException } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
+import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository, In } from 'typeorm';
 import { Developer } from './developer.entity';
 import { CreateDeveloperDto, DeveloperOnboardingStage, DeveloperWithWallet, UpdateDeveloperDto, UpdateDeveloperOnboardingStageDto, UpdateDeveloperStatusDto } from './developer.dto';
@@ -65,6 +65,7 @@ export class DeveloperService {
 
     private readonly userService: UserService,
 
+    @InjectDataSource('developer')
     private dataSource: DataSource,
   ) {
     this.app = TypeHelper.toEnum(App, process.env.app)

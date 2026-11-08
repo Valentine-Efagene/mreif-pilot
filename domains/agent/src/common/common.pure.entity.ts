@@ -13,18 +13,19 @@ export abstract class AbstractBaseEntity {
   id: number;
 
   @Field((type) => GraphQLISODateTime)
-  @CreateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+  @CreateDateColumn({ type: 'datetime', precision: 6, default: () => 'CURRENT_TIMESTAMP(6)' })
   createdAt: Date;
 
   @Field((type) => GraphQLISODateTime)
   @UpdateDateColumn({
-    type: 'timestamp',
-    default: () => 'CURRENT_TIMESTAMP',
-    onUpdate: 'CURRENT_TIMESTAMP',
+    type: 'datetime',
+    precision: 6,
+    default: () => 'CURRENT_TIMESTAMP(6)',
+    onUpdate: 'CURRENT_TIMESTAMP(6)',
   })
   updatedAt: Date;
 
   @Field((type) => GraphQLISODateTime)
-  @DeleteDateColumn({ nullable: true, default: null })
+  @DeleteDateColumn({ type: 'datetime', precision: 6, nullable: true })
   deletedAt: Date;
 }

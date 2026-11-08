@@ -14,7 +14,7 @@ export function buildTypeOrmOptions(
     name: connectionName,
     type: 'mysql',
     host,
-    port: config.get<number>('DB_PORT', 3306),
+    port: Number(config.get('DB_PORT', 3306)),
     username: config.get<string>('DB_USERNAME', 'root'),
     password: config.get<string>('DB_PASSWORD', ''),
     database: config.get<string>('DB_NAME', 'qshelter-dev'),
@@ -24,5 +24,6 @@ export function buildTypeOrmOptions(
       (isLocal && config.get('NODE_ENV') !== 'production'),
     namingStrategy: new CustomNamingStrategy(),
     logging: config.get('TYPEORM_LOGGING') === 'true',
+    extra: { allowPublicKeyRetrieval: true },
   };
 }

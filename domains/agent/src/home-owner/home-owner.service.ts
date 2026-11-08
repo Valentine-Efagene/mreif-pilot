@@ -1,5 +1,5 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
+import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
 import { CreateHomeOwnerDto, PaginatedHomeOwners, UpdateHomeOwnerStatusDto } from './home-owner.dto';
 import { HomeOwner } from './home-owner.entity';
@@ -33,6 +33,7 @@ export class HomeOwnerService {
     private readonly homeOwnerDocumentService: HomeOwnerDocumentService,
     private readonly homeOwnerPocService: HomeOwnerPocService,
     private readonly notificationService: NotificationService,
+    @InjectDataSource('agent')
     private dataSource: DataSource,
   ) { }
 

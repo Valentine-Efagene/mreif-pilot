@@ -3,7 +3,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
+import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
 import { CreateLicensingInfoDto } from './licensing-info.dto';
 import { LicensingInfo } from './licensing-info.entity';
@@ -23,6 +23,7 @@ export class LicensingInfoService {
   constructor(
     @InjectRepository(LicensingInfo, 'agent')
     private readonly licensingInfoRepository: Repository<LicensingInfo>,
+    @InjectDataSource('agent')
     private dataSource: DataSource,
   ) { }
 

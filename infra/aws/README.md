@@ -25,9 +25,14 @@ Bootstrap (once per account/region), if needed:
 npx cdk bootstrap aws://$CDK_DEFAULT_ACCOUNT/us-east-1
 ```
 
+Data plane (created by the stack):
+
+- **RDS MySQL** — credentials in `mofi-platform-api/{stage}/db` (injected into ECS as `DB_*`)
+- **S3 uploads bucket** — name in stack output `UploadsBucketName`; ECS uses the **task role** (no access keys in secrets)
+
 Populate secrets:
 
-- `mofi-platform-api/{stage}/app` — DB, JWT, optional S3
+- `mofi-platform-api/{stage}/app` — JWT (`JWT_SECRET` generated on create)
 - `mofi-platform-api/{stage}/rabbitmq` — Amazon MQ password (username `mofi`)
 
 Deploy modes:

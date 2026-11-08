@@ -19,6 +19,7 @@ import { AppService } from './app.service';
 @Module({
   imports: [
     TypeOrmModule.forRootAsync({
+      name: PMB_CONNECTION,
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: (config: ConfigService) =>

@@ -1,5 +1,5 @@
 import { BadRequestException, Injectable, Logger, NotFoundException } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
+import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
 import { CreateAgentDto, PaginatedAgents, ReferreePaginationDto, UpdateAgentStatusDto } from './agent.dto';
 import { Agent } from './agent.entity';
@@ -44,6 +44,7 @@ export class AgentService {
     private readonly userService: UserService,
     private readonly licensingDocumentService: LicensingDocumentService,
     private readonly notificationService: NotificationService,
+    @InjectDataSource('agent')
     private dataSource: DataSource,
   ) {
     this.app = TypeHelper.toEnum(App, process.env.APP)

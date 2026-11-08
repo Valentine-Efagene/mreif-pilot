@@ -21,6 +21,7 @@ import { AppService } from './app.service';
 @Module({
   imports: [
     TypeOrmModule.forRootAsync({
+      name: COOPERATIVE_CONNECTION,
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: (config: ConfigService) =>

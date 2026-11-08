@@ -8,6 +8,7 @@ import * as iam from 'aws-cdk-lib/aws-iam';
 import * as secretsmanager from 'aws-cdk-lib/aws-secretsmanager';
 import * as amazonmq from 'aws-cdk-lib/aws-amazonmq';
 import * as rds from 'aws-cdk-lib/aws-rds';
+import * as s3 from 'aws-cdk-lib/aws-s3';
 import { Construct } from 'constructs';
 
 /** Initial schema name (RDS allows alphanumeric only; app default is qshelter-dev locally). */
@@ -50,10 +51,9 @@ export class MofiPlatformApiStack extends cdk.Stack {
     super(scope, id, props);
 
     const { stage } = props;
-    // dev: one task (fits Fargate); staging/main: multicontainer via -c deploymentMode=multicontainer
     const deploymentMode =
       this.node.tryGetContext('deploymentMode') ??
-      (stage === 'dev' ? 'monolith' : 'multicontainer');
+      (stage === 'main' ? 'multicontainer' : 'monolith');
 
     const vpc = new ec2.Vpc(this, 'Vpc', {
       maxAzs: 2,
@@ -132,6 +132,17 @@ export class MofiPlatformApiStack extends cdk.Stack {
 
     database.connections.allowDefaultPortFrom(taskSg);
 
+    const uploadsBucket = new s3.Bucket(this, 'UploadsBucket', {
+      bucketName: `mofi-platform-uploads-${stage}-${this.account}`,
+      encryption: s3.BucketEncryption.S3_MANAGED,
+      blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
+      enforceSSL: true,
+      versioned: stage === 'main',
+      removalPolicy:
+        stage === 'main' ? cdk.RemovalPolicy.RETAIN : cdk.RemovalPolicy.DESTROY,
+      autoDeleteObjects: stage !== 'main',
+    });
+
     const brokerSg = new ec2.SecurityGroup(this, 'BrokerSecurityGroup', {
       vpc,
       description: 'Amazon MQ RabbitMQ broker',
@@ -168,12 +179,7 @@ export class MofiPlatformApiStack extends cdk.Stack {
     if (dbSecret) {
       dbSecret.grantRead(taskRole);
     }
-    taskRole.addToPolicy(
-      new iam.PolicyStatement({
-        actions: ['s3:GetObject', 's3:PutObject', 's3:DeleteObject'],
-        resources: ['arn:aws:s3:::mofi-*/*'],
-      }),
-    );
+    uploadsBucket.grantReadWrite(taskRole);
     taskRole.addToPolicy(
       new iam.PolicyStatement({
         actions: ['lambda:InvokeFunction'],
@@ -184,12 +190,15 @@ export class MofiPlatformApiStack extends cdk.Stack {
     const isMulti = deploymentMode === 'multicontainer';
     const taskDefinition = new ecs.FargateTaskDefinition(this, 'TaskDef', {
       // Eight Nest processes on one task; 4 GiB was tight (exit 137).
-      memoryLimitMiB: isMulti ? 16384 : 4096,
-      cpu: isMulti ? 4096 : 1024,
+      // Monolith loads five TypeORM connections; 8 GiB avoids OOM during synchronize.
+      memoryLimitMiB: isMulti ? 16384 : 8192,
+      cpu: isMulti ? 4096 : 2048,
       taskRole,
     });
 
     const image = ecs.ContainerImage.fromEcrRepository(repository, 'latest');
+
+    const stackRegion = cdk.Stack.of(this).region;
 
     const sharedEnvironment: Record<string, string> = {
       NODE_ENV: stage === 'main' ? 'production' : 'development',
@@ -202,6 +211,10 @@ export class MofiPlatformApiStack extends cdk.Stack {
       AMQP_VHOST: '/',
       AMQP_USERNAME: 'mofi',
       AMQP_URL: cdk.Token.asString(cdk.Fn.select(0, broker.attrAmqpEndpoints)),
+      AWS_S3_BUCKET_NAME: uploadsBucket.bucketName,
+      AWS_S3_REGION: stackRegion,
+      CUSTOM_AWS_S3_BUCKET_NAME: uploadsBucket.bucketName,
+      CUSTOM_AWS_REGION: stackRegion,
     };
 
     if (!dbSecret) {
@@ -246,7 +259,7 @@ export class MofiPlatformApiStack extends cdk.Stack {
           interval: cdk.Duration.seconds(30),
           timeout: cdk.Duration.seconds(5),
           retries: 3,
-          startPeriod: cdk.Duration.seconds(180),
+          startPeriod: cdk.Duration.seconds(isMulti ? 180 : 300),
         },
       });
       if (exposePort) {
@@ -295,7 +308,7 @@ export class MofiPlatformApiStack extends cdk.Stack {
       assignPublicIp: true,
       securityGroups: [taskSg],
       circuitBreaker: { rollback: true },
-      healthCheckGracePeriod: cdk.Duration.seconds(300),
+      healthCheckGracePeriod: cdk.Duration.seconds(isMulti ? 300 : 600),
     });
 
     service.node.addDependency(broker);
@@ -328,6 +341,7 @@ export class MofiPlatformApiStack extends cdk.Stack {
     new cdk.CfnOutput(this, 'SecretArn', { value: appSecret.secretArn });
     new cdk.CfnOutput(this, 'DbSecretArn', { value: dbSecret.secretArn });
     new cdk.CfnOutput(this, 'DbEndpoint', { value: database.dbInstanceEndpointAddress });
+    new cdk.CfnOutput(this, 'UploadsBucketName', { value: uploadsBucket.bucketName });
     new cdk.CfnOutput(this, 'BrokerSecretArn', { value: brokerSecret.secretArn });
     new cdk.CfnOutput(this, 'DeploymentMode', { value: deploymentMode });
   }

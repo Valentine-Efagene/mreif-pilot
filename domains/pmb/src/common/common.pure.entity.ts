@@ -6,12 +6,17 @@ export abstract class AbstractBaseEntity {
     @PrimaryGeneratedColumn()
     id: number;
 
-    @CreateDateColumn()
+    @CreateDateColumn({ type: 'datetime', precision: 6, default: () => 'CURRENT_TIMESTAMP(6)' })
     createdAt: Date;
 
-    @UpdateDateColumn()
+    @UpdateDateColumn({
+        type: 'datetime',
+        precision: 6,
+        default: () => 'CURRENT_TIMESTAMP(6)',
+        onUpdate: 'CURRENT_TIMESTAMP(6)',
+    })
     updatedAt: Date;
 
-    @DeleteDateColumn({ nullable: true, default: null })
+    @DeleteDateColumn({ type: 'datetime', precision: 6, nullable: true })
     deletedAt: Date;
 }

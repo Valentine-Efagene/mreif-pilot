@@ -19,6 +19,7 @@ import { RsaLegacyApiController } from './rsa/rsa-legacy-api.controller';
 @Module({
   imports: [
     TypeOrmModule.forRootAsync({
+      name: RSA_CONNECTION,
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: (config: ConfigService) =>

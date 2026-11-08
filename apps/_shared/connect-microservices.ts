@@ -49,5 +49,10 @@ export async function connectMofiMicroservices(
     });
   }
 
-  await app.startAllMicroservices();
+  try {
+    await app.startAllMicroservices();
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    console.error(`RMQ microservices failed to start (HTTP will still listen): ${msg}`);
+  }
 }

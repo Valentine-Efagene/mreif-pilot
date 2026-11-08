@@ -10,13 +10,19 @@ export function getS3ClientConfig(): S3ClientConfig {
   const forcePathStyle =
     envTruthy(process.env.CUSTOM_AWS_FORCE_PATH_STYLE) || Boolean(endpoint);
 
+  const accessKeyId =
+    process.env.CUSTOM_AWS_ACCESS_KEY_ID ?? process.env.AWS_S3_ACCESS_KEY_ID;
+  const secretAccessKey =
+    process.env.CUSTOM_AWS_SECRET_ACCESS_KEY ?? process.env.AWS_S3_SECRET_ACCESS_KEY;
+
   const config: S3ClientConfig = {
-    credentials: {
-      accessKeyId: process.env.CUSTOM_AWS_ACCESS_KEY_ID ?? '',
-      secretAccessKey: process.env.CUSTOM_AWS_SECRET_ACCESS_KEY ?? '',
-    },
     region: process.env.CUSTOM_AWS_REGION ?? process.env.AWS_S3_REGION ?? 'us-east-1',
   };
+
+  // ECS Fargate: omit credentials so the SDK uses the task IAM role.
+  if (accessKeyId && secretAccessKey) {
+    config.credentials = { accessKeyId, secretAccessKey };
+  }
 
   if (endpoint) {
     config.endpoint = endpoint;

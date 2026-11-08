@@ -1,5 +1,5 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
+import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
 import { DeveloperDirectorDocument } from './developer-director-document.entity';
 import {
@@ -28,6 +28,7 @@ export class DeveloperDirectorDocumentService {
     private readonly developerDirectorRepository: Repository<DeveloperDirector>,
     private readonly uploaderService: S3UploaderService,
     private readonly developerService: DeveloperService,
+    @InjectDataSource('developer')
     private dataSource: DataSource,
   ) { }
 

@@ -10,8 +10,8 @@ export abstract class AbstractBaseReviewableEntity extends AbstractBaseEntity {
   @JoinColumn({ name: 'reviewed_by' })
   reviewer: User;
 
-  @Column({ type: 'timestamp', nullable: true })
-  reviewedAt: string;
+  @Column({ type: 'datetime', precision: 6, nullable: true })
+  reviewedAt: Date;
 }
 
 @ObjectType()
