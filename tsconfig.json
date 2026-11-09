@@ -20,5 +20,5 @@
       "@mofi/storage/*": ["libs/storage/src/*"]
     }
   },
-  "include": ["apps/**/*", "domains/**/*", "libs/**/*"]
+  "include": ["apps/**/*", "domains/**/*", "libs/**/*", "system-tests/**/*"]
 }

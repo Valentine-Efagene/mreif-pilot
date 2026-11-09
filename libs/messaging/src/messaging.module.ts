@@ -2,11 +2,14 @@ import { Global, Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import {
-  MOFI_DOMAIN_COMMANDS_QUEUE,
   MOFI_NOTIFICATIONS_QUEUE,
   MOFI_VERIFIER_LAMBDA_QUEUE,
 } from './message-envelope';
-import { buildRmqMicroserviceOptions, getAmqpUrls } from './rmq-config';
+import {
+  buildDomainCommandsProducerOptions,
+  buildRmqClientOptions,
+  getAmqpUrls,
+} from './rmq-config';
 
 export const NOTIFICATIONS_CLIENT = 'NOTIFICATIONS_CLIENT';
 export const VERIFIER_LAMBDA_CLIENT = 'VERIFIER_LAMBDA_CLIENT';
@@ -23,7 +26,7 @@ export const DOMAIN_COMMANDS_CLIENT = 'DOMAIN_COMMANDS_CLIENT';
         inject: [ConfigService],
         useFactory: (config: ConfigService) => ({
           transport: Transport.RMQ,
-          options: buildRmqMicroserviceOptions(config, MOFI_NOTIFICATIONS_QUEUE),
+          options: buildRmqClientOptions(config, MOFI_NOTIFICATIONS_QUEUE),
         }),
       },
       {
@@ -32,7 +35,7 @@ export const DOMAIN_COMMANDS_CLIENT = 'DOMAIN_COMMANDS_CLIENT';
         inject: [ConfigService],
         useFactory: (config: ConfigService) => ({
           transport: Transport.RMQ,
-          options: buildRmqMicroserviceOptions(config, MOFI_VERIFIER_LAMBDA_QUEUE),
+          options: buildRmqClientOptions(config, MOFI_VERIFIER_LAMBDA_QUEUE),
         }),
       },
       {
@@ -41,7 +44,7 @@ export const DOMAIN_COMMANDS_CLIENT = 'DOMAIN_COMMANDS_CLIENT';
         inject: [ConfigService],
         useFactory: (config: ConfigService) => ({
           transport: Transport.RMQ,
-          options: buildRmqMicroserviceOptions(config, MOFI_DOMAIN_COMMANDS_QUEUE),
+          options: buildDomainCommandsProducerOptions(config),
         }),
       },
     ]),
@@ -50,4 +53,3 @@ export const DOMAIN_COMMANDS_CLIENT = 'DOMAIN_COMMANDS_CLIENT';
 })
 export class MofiMessagingModule {}
 
-export { getAmqpUrls, buildRmqMicroserviceOptions };

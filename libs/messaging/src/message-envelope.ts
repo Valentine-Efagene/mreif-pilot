@@ -1,6 +1,15 @@
 export const MOFI_NOTIFICATIONS_QUEUE = 'mofi.notifications.commands';
 export const MOFI_VERIFIER_LAMBDA_QUEUE = 'mofi.verifier.lambda.commands';
-export const MOFI_DOMAIN_COMMANDS_QUEUE = 'mofi.domain.commands';
+
+export {
+  MOFI_DOMAIN_COMMANDS_EXCHANGE,
+  MOFI_DOMAIN_COMMANDS_QUEUE,
+  domainCommandsQueueName,
+  domainCommandsBindingKey,
+  DOMAIN_COMMAND_CONSUMER_ROLES,
+  isDomainCommandConsumerRole,
+} from './domain-commands';
+export type { DomainCommandConsumerRole } from './domain-commands';
 
 export type MessageEnvelope<T = unknown> = {
   eventName: string;

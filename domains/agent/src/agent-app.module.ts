@@ -15,7 +15,6 @@ import { AgentDomainModule } from './agent-domain.module';
         PORT: Joi.number().port().default(3001),
         MOFI_RUNTIME: Joi.string().default('domain'),
         MOFI_WORKER_QUEUES: Joi.string().default('none'),
-        MESSAGING_ENABLED: Joi.string().valid('true', 'false').default('false'),
       }),
     }),
     MofiAuthModule.forRoot(),

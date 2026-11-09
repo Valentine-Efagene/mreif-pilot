@@ -59,6 +59,7 @@ services:
       RABBITMQ_DEFAULT_USER: mofi
       RABBITMQ_DEFAULT_PASS: mofi
       RABBITMQ_DEFAULT_VHOST: mofi
+      RABBITMQ_ERLANG_COOKIE: mofi_dev_rabbit_cookie
     ports:
       - "5672:5672"
       - "15672:15672"

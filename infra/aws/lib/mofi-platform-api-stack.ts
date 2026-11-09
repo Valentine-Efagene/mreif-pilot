@@ -197,10 +197,8 @@ export class MofiPlatformApiStack extends cdk.Stack {
     const sharedEnvironment: Record<string, string> = {
       NODE_ENV: stage === 'main' ? 'production' : 'development',
       MOFI_STAGE: stage,
+      SWAGGER_ENABLED: 'true',
       AUTH_ENFORCEMENT: 'gateway',
-      MESSAGING_ENABLED: 'true',
-      NOTIFICATION_MODE: 'async',
-      LAMBDA_INVOKE_MODE: 'async',
       // Never run schema sync from eight containers against one RDS task (race + memory spike).
       TYPEORM_SYNCHRONIZE: 'false',
       NODE_OPTIONS: '--max-old-space-size=1400',

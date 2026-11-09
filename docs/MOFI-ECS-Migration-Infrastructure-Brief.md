@@ -4,19 +4,35 @@ Infrastructure brief for engineering leadership
 
 Audience: CTO / engineering leadership
 
-Status: Pilot — implementation in progress
+Status: **Pilot scope — architecture validated** (dev ECS proof, November 2026). Ready for staging + Gateway wiring and Phase 2 shadow against Lambdas.
 
-Date: October 2026
+Date: November 2026
 
 Author: Platform / MOFI engineering
 
 # 1. EXECUTIVE SUMMARY
 
-Pilot domain APIs move from separate NestJS Lambdas to one ECS Fargate service (MOFI Platform API), using a strangler cutover so URL paths stay the same for clients, including MofixQshelter Admin.
+Pilot domain APIs move from separate NestJS Lambdas to one ECS Fargate **multicontainer** service (MOFI Platform API), using a strangler cutover so URL paths stay the same for clients, including MofixQshelter Admin.
 
-Unchanged in AWS: existing S3 bucket, existing MySQL, external notification service (HTTP via NOTIFICATION_URL). New: ECS Fargate, Application Load Balancer, ECR, Redis (ElastiCache sizing TBD).
+Unchanged in AWS for **production cutover**: existing S3 bucket, **existing MySQL**, external notification service (HTTP via `NOTIFICATION_URL`). New: ECS Fargate (eight containers per task), Application Load Balancer, ECR, Amazon MQ for RabbitMQ in the ECS VPC, Secrets Manager, and (for agent, TBD) Redis/ElastiCache.
 
-The main cutover risk for clients is not path routing but **authorization**: the **API Gateway custom authorizer Lambda** remains the JWT gate; ECS Fargate runs behind Gateway (VPC Link → ALB) with no duplicate global JWT guard. Handler roles use the shared **@qshelter/nest-auth** library (Section 6).
+The main cutover risk for clients is not path routing but **authorization**: the **API Gateway custom authorizer Lambda** remains the JWT gate; ECS Fargate runs behind Gateway (VPC Link → ALB) with **no duplicate global JWT guard**. Handler roles use the shared **@qshelter/nest-auth** library (Section 6).
+
+## 1.1 What we proved (November 2026)
+
+The **Level 3 deployment model is implemented and exercised in AWS**, not only on paper:
+
+| Area | Outcome |
+| :---- | :---- |
+| **Runtime layout** | One Fargate task = **edge** (ALB target) + **six domain processes** + **worker** (`MOFI_CONTAINER_ROLE`); single ECR image, [`docker/entrypoint.sh`](../docker/entrypoint.sh). Local **kind/Helm** matches the same layout. |
+| **Repo structure** | Domains under `domains/{name}/` (split-ready); shared edge/worker under `apps/`. Monolith / `deploymentMode` **removed** — multicontainer only. |
+| **IaC (CDK)** | VPC, ECS service, ALB, RDS MySQL (dev accounts), stage S3, Amazon MQ, Secrets Manager, task IAM. `AUTH_ENFORCEMENT=gateway`, `TYPEORM_SYNCHRONIZE=false`, async feature flags wired. |
+| **Health & routing** | `GET /health`, `GET /{domain}/health` green on ALB; edge preserves domain path prefix on upstream hops. |
+| **Automated checks** | `npm run test:contract` (domain routes, public-route parity); `npm run auth:shadow` for Phase 2 Gateway vs Lambda comparison. |
+| **Messaging** | Topic exchange `mofi.domain.commands`; domain containers consume their queues (`developer.#`, …); worker handles notifications + verifier only; catalog in `docs/async-events.md`. |
+| **Developer experience** | Per-domain OpenAPI at `GET /{domain}/docs` via edge (Swagger); tunable via `SWAGGER_ENABLED`. |
+
+Dev/staging accounts can stand up and tear down the stack with `npx cdk deploy|destroy -c stage=dev`. **Production cutover** still requires pointing API Gateway pilot integrations at the MOFI ALB (VPC Link) and shadowing against live Lambdas (Phases 2–4).
 
 # 2. CURRENT STATE (AS-IS)
 
@@ -30,11 +46,11 @@ Non-pilot routes (onboarding, apply, mortgage, propy, backoffice, wallet, and si
 
 # 3. TARGET STATE (PILOT)
 
-Pilot traffic stays on the **same API host**: API Gateway (custom authorizer) → VPC Link → Application Load Balancer → ECS Fargate (edge + domain containers). Non-pilot paths continue to existing Lambdas until later migration waves.
+Pilot traffic stays on the **same API host**: API Gateway (custom authorizer) → VPC Link → Application Load Balancer → ECS Fargate (**edge + six domains + worker**). Non-pilot paths continue to existing Lambdas until later migration waves.
 
-ECS tasks do **not** re-validate JWTs on the hot path in staging/production (`AUTH_ENFORCEMENT=gateway`). **@qshelter/nest-auth** supplies role checks and request helpers inside handlers. Tasks connect to existing MySQL and S3, add Redis (ElastiCache), and call the notification HTTP API unchanged.
+ECS tasks do **not** re-validate JWTs on the hot path in staging/production (`AUTH_ENFORCEMENT=gateway`). **@qshelter/nest-auth** supplies role checks and request helpers inside handlers. Tasks connect to **existing MySQL** and S3 at cutover, publish async work to **Amazon MQ**, and call the notification HTTP API unchanged.
 
-Pilot AWS infrastructure (IaC): VPC, ECS cluster and service, ECR, load balancer, Secrets Manager for database and JWT credentials, logging, and IAM for S3 access from tasks.
+Pilot AWS infrastructure (IaC): VPC, ECS cluster and service (multicontainer task definition), ECR, load balancer, RDS **for non-prod accounts** or connectivity to **existing RDS** in prod, Amazon MQ, Secrets Manager, logging, and IAM for S3 access from tasks.
 
 Figure 2: Target state (pilot) architecture
 
@@ -58,21 +74,23 @@ Table 2: Unchanged dependencies
 | Dependency | Role |
 | :---- | :---- |
 | Existing S3 bucket | Production uploads; ECS task IAM |
-| Existing MySQL | Domain data; credentials in Secrets Manager |
-| Notification HTTP API | NOTIFICATION_URL; stays external for pilot |
+| Existing MySQL | Domain data at prod cutover; credentials in Secrets Manager |
+| Notification HTTP API | `NOTIFICATION_URL`; stays external for pilot |
 | Non-pilot Lambdas | Remain on API Gateway until later waves |
 
 Deferred domains: bank-statement, publications, wallet, backoffice, mortgage, propy, onboarding, and others.
 
 # 5. MIGRATION PHASES
 
-| Phase | Activity | Rollback |
-| :---- | :---- | :---- |
-| 0 — Build | Monolith, infrastructure provisioning, automated API checks (including auth) | N/A |
-| 1 — Staging ECS | Deploy load balancer; QA in staging | Production stays on Lambdas |
-| 2 — Shadow | Compare staging ECS vs Lambdas on pilot paths; compare authorizer vs ECS auth outcomes | |
-| 3 — Cutover | Route pilot base paths to load balancer | Revert gateway or DNS mapping |
-| 4 — Soak | Retire pilot Lambdas | Keep container images for emergency |
+| Phase | Activity | Rollback | Status |
+| :---- | :---- | :---- | :---- |
+| 0 — Build | **Multicontainer** platform repo, CDK, contract + auth shadow tests, k8s parity | N/A | **Done** (Nov 2026) |
+| 1 — Staging ECS | Deploy ALB + Fargate; QA on pilot paths (direct ALB or via Gateway) | Production stays on Lambdas | **Proven** on dev account; repeat for long-lived staging |
+| 2 — Shadow | Compare Gateway-fronted ECS vs Lambdas on pilot paths; authorizer outcomes vs ECS | N/A | Tooling ready (`auth:shadow`); **blocked on Gateway → ALB** for prod-like path |
+| 3 — Cutover | Route pilot base paths to load balancer | Revert gateway or DNS mapping | Not started |
+| 4 — Soak | Retire pilot Lambdas | Keep container images for emergency | Not started |
+
+Implementation runbooks: [`infra/aws/CUTOVER.md`](../infra/aws/CUTOVER.md), [`infra/aws/GATEWAY-AUTH.md`](../infra/aws/GATEWAY-AUTH.md).
 
 # 6. AUTHORIZATION CARRYOVER
 
@@ -82,7 +100,7 @@ When pilot paths are routed **API Gateway (authorizer) → Application Load Bala
 
 **Client contract (unchanged):**
 
-Protected pilot routes continue to require a Bearer token. The `user_id` header remains part of the contract where it is used today. Public routes stay configured on the **authorizer Lambda** (cooperative login, selected “names” list endpoints, health, OPTIONS preflight).
+Protected pilot routes continue to require a Bearer token. The `user_id` header remains part of the contract where it is used today. Public routes stay configured on the **authorizer Lambda** (cooperative login, selected “names” list endpoints, health, Swagger `/docs` if exposed, OPTIONS preflight).
 
 **Inside ECS (Nest):**
 
@@ -94,7 +112,7 @@ The authorizer Lambda validates tokens against production signing material. ECS 
 
 **Shadow and cutover checks:**
 
-During Phase 2, run the same authenticated and unauthenticated calls against Lambda-backed staging and **Gateway-fronted** ECS staging on every pilot base path. Compare HTTP status codes and bodies for protected, public, and edge cases. Cutover proceeds only when outcomes match within agreed tolerance.
+During Phase 2, run the same authenticated and unauthenticated calls against Lambda-backed staging and **Gateway-fronted** ECS staging on every pilot base path. Compare HTTP status codes and bodies for protected, public, and edge cases. Cutover proceeds only when outcomes match within agreed tolerance. The repo includes `npm run auth:shadow` for automated status comparison.
 
 **Split-host behaviour during pilot:**
 
@@ -108,47 +126,49 @@ Confirm authorizer public-route configuration matches platform expectations. Wir
 
 | Concern | Approach |
 | :---- | :---- |
-| Database | Existing MySQL; no schema change for this infrastructure pilot |
-| Object storage | Existing S3 bucket in AWS |
+| Database | **Production cutover:** existing MySQL; no schema change required for infrastructure pilot. **Dev proof:** RDS MySQL provisioned in CDK for isolated accounts. |
+| Object storage | Existing S3 bucket in AWS (stage-specific bucket in dev IaC) |
 | Authentication | Section 6 — API Gateway authorizer; @qshelter/nest-auth in Nest; no duplicate JWT guard on Fargate in prod |
-| Secrets | Application secrets in Secrets Manager (staging and production) |
-| Network | New VPC for ECS; connectivity to RDS via security groups (ops to align) |
+| Secrets | Application, DB, and broker secrets in Secrets Manager |
+| Network | Dedicated VPC for ECS; security groups to RDS and Amazon MQ |
 
 # 8. RISKS
 
 | Risk | Mitigation |
 | :---- | :---- |
-| Authorization regression | Section 6 shadow tests; same JWT secrets on ECS; public-route checklist |
-| Path regression | Automated API checks; RSA legacy routes |
-| MySQL connections | Connection pool tuning; monitoring |
+| Authorization regression | Section 6 shadow tests; Gateway-only JWT; public-route checklist |
+| Path regression | Automated API checks; RSA legacy routes; contract tests on ALB |
+| MySQL connections | Eight processes × pool tuning; `TYPEORM_SYNCHRONIZE=false`; monitoring |
+| Task memory / startup | Dev validated 60 GiB / 8 vCPU task; tune for `main`; health `startPeriod` |
 | Redis timing | Agent domain review before ElastiCache in production |
 | Partial cutover | Pilot paths only; gateway rollback; unified tokens across Lambda and ECS |
 
 # 9. OPS INPUTS
 
-1. RDS and network path from the ECS VPC to existing MySQL.
+1. RDS and network path from the ECS VPC to **production** existing MySQL (replace in-stack RDS used for dev proof).
 2. Redis requirement for the agent domain (ElastiCache vs defer).
 3. Authorizer JWT secrets and validation rules for staging/production parity on ECS.
 4. Staging cutover window and rollback owner.
-5. Ordering of post-pilot migration waves after soak.
+5. VPC Link + API Gateway route updates for pilot paths (see GATEWAY-AUTH.md).
+6. Ordering of post-pilot migration waves after soak.
 
-# 10. LEVELS 2–3 — MESSAGING AND DOMAIN RUNTIMES
+# 10. PLATFORM ARCHITECTURE (DELIVERED)
 
-After pilot cutover (phases 0–4), the platform evolves on the same Fargate deployment model:
+The following was previously described as Levels 2–3 “after cutover”; it is **now the implemented baseline** validated in dev:
 
-Level 2 — Messaging foundation
+**Messaging**
 
-- Amazon MQ for RabbitMQ in the ECS VPC (private, task security groups only).
-- Domains publish notification and Lambda-invoke work to durable queues; worker containers call the existing notification HTTP API and Lambda functions unchanged.
-- Feature flags: sync vs async notification delivery during migration (`NOTIFICATION_MODE`, `LAMBDA_INVOKE_MODE`).
+- Amazon MQ for RabbitMQ in the ECS VPC (private; task security groups only) — **in CDK**.
+- Domains publish notification and Lambda-invoke work to durable queues; worker container calls the existing notification HTTP API and Lambda functions.
+- RabbitMQ required for notifications, verifier lambda invokes, and domain command consumers.
 
-Level 3 — Single Fargate service, one runtime per domain
+**Single Fargate service, one runtime per domain**
 
 - One task definition, one deploy pipeline, one ECR image.
-- Containers: edge (ALB target, path routing), six pilot domain runtimes, optional worker for queue consumers.
+- Containers: **edge** (ALB target, path routing), **six** pilot domain runtimes (each may host Nest RMQ consumers for its domain commands), **worker** for platform notification/Lambda queues (eight containers total).
 - Inter-domain integration via RabbitMQ; external HTTP paths unchanged for clients.
-- Rollback: redeploy prior image or switch CDK context `deploymentMode=monolith` for single-container mode.
+- Rollback: redeploy prior ECR image; **no** monolith / single-container fallback.
 
-Level 4 (optional)
+**Level 4 (optional, unchanged)**
 
 - Split Fargate services per domain only if leadership accepts multiple deploy pipelines; messaging contracts stay stable.

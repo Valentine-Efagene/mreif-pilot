@@ -1,21 +1,32 @@
 flowchart TB
   Clients["Clients (unchanged URLs / paths)"]
+  Authorizer["API Gateway custom authorizer\n(single JWT gate)"]
   Route["API Gateway / DNS (strangler)\nPilot paths → ALB\nOther paths → Lambdas"]
   ALB["Application Load Balancer\nHealth: GET /health"]
-  ECS["ECS Fargate — MOFI Platform API\nIn-process JWT + user guard"]
+  subgraph ECS["ECS Fargate — one task, eight containers"]
+    Edge["edge :8080\npath proxy"]
+    Domains["six domain runtimes\n/agent … /cooperative"]
+    Worker["worker\nqueue consumers"]
+  end
   Legacy["Legacy Lambdas\n(non-pilot paths)"]
-  MySQL[(MySQL — existing)]
-  S3[(S3 — existing)]
-  Redis[(Redis — ElastiCache, new)]
+  MySQL[(MySQL — existing in prod;\nRDS in dev IaC proof)]
+  S3[(S3 — existing / stage bucket)]
+  RMQ[(Amazon MQ for RabbitMQ)]
+  Redis[(Redis — ElastiCache, TBD)]
   Notify["Notification HTTP\n(unchanged)"]
 
   Clients --> Route
-  Route --> ALB
+  Route --> Authorizer
+  Authorizer --> ALB
   Route --> Legacy
-  ALB --> ECS
-  ECS --> MySQL
-  ECS --> S3
-  ECS --> Redis
-  ECS --> Notify
+  ALB --> Edge
+  Edge --> Domains
+  Domains --> MySQL
+  Domains --> S3
+  Domains --> RMQ
+  Domains --> Redis
+  Domains --> Notify
+  Worker --> RMQ
+  Worker --> Notify
   Legacy --> MySQL
   Legacy --> S3

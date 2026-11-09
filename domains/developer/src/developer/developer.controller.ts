@@ -214,19 +214,15 @@ export class DeveloperController {
     @Param('id', ParseIntPipe) id: number,
     @Headers('idempotency-key') idempotencyKey?: string,
   ): Promise<StandardApiResponse<void | { jobId: string; statusUrl: string }>> {
-    if (this.developerService.shouldPurgeDeveloperAsync()) {
-      const asyncJob = await this.developerService.enqueueDeveloperRemoval(
-        id,
-        idempotencyKey,
-      );
-      return new StandardApiResponse(
-        HttpStatus.ACCEPTED,
-        'Deletion queued',
-        asyncJob,
-      );
-    }
-    await this.developerService.remove(id);
-    return new StandardApiResponse(HttpStatus.OK, ResponseMessage.DELETED, null);
+    const asyncJob = await this.developerService.enqueueDeveloperRemoval(
+      id,
+      idempotencyKey,
+    );
+    return new StandardApiResponse(
+      HttpStatus.ACCEPTED,
+      'Deletion queued',
+      asyncJob,
+    );
   }
 
   // @Put('logo/:id')

@@ -13,4 +13,4 @@ npx @mermaid-js/mermaid-cli@11 -i mofi-ecs-migration-as-is.mmd -o mofi-ecs-migra
 npx @mermaid-js/mermaid-cli@11 -i mofi-ecs-migration-pilot.mmd -o mofi-ecs-migration-pilot.png -b white
 ```
 
-Draft: `../MOFI-ECS-Migration-Infrastructure-Brief.md`. Push to Google Doc when approved.
+Brief (validated Nov 2026): [`../MOFI-ECS-Migration-Infrastructure-Brief.md`](../MOFI-ECS-Migration-Infrastructure-Brief.md). Sync to the leadership Google Doc when the brief changes.

@@ -1,4 +1,9 @@
 import { ConfigService } from '@nestjs/config';
+import {
+  MOFI_DOMAIN_COMMANDS_EXCHANGE,
+  domainCommandsBindingKey,
+  domainCommandsQueueName,
+} from './domain-commands';
 
 export type MofiRmqOptions = {
   urls: string[];
@@ -7,6 +12,10 @@ export type MofiRmqOptions = {
   noAck?: boolean;
   prefetchCount?: number;
   isGlobalPrefetchCount?: boolean;
+  wildcards?: boolean;
+  exchange?: string;
+  exchangeType?: 'direct' | 'fanout' | 'topic' | 'headers';
+  routingKey?: string;
 };
 
 export function getAmqpUrls(config: ConfigService): string[] {
@@ -38,9 +47,16 @@ export function getAmqpUrls(config: ConfigService): string[] {
   return [`amqp://${user}:${pass}@${host}:${port}/${vhost}`];
 }
 
+/** RMQ microservice consumer (worker / domain command handlers). */
 export function buildRmqMicroserviceOptions(
   config: ConfigService,
   queue: string,
+  extra: Partial<
+    Pick<
+      MofiRmqOptions,
+      'wildcards' | 'exchange' | 'exchangeType' | 'routingKey'
+    >
+  > = {},
 ): MofiRmqOptions {
   return {
     urls: getAmqpUrls(config),
@@ -49,9 +65,55 @@ export function buildRmqMicroserviceOptions(
     noAck: false,
     prefetchCount: 1,
     isGlobalPrefetchCount: true,
+    ...extra,
   };
 }
 
-export function isMessagingEnabled(config: ConfigService): boolean {
-  return config.get<string>('MESSAGING_ENABLED', 'false') === 'true';
+/** RMQ ClientProxy publisher (`emit`); reply consumer requires noAck. */
+export function buildRmqClientOptions(
+  config: ConfigService,
+  queue: string,
+  extra: Partial<
+    Pick<
+      MofiRmqOptions,
+      'wildcards' | 'exchange' | 'exchangeType' | 'routingKey'
+    >
+  > = {},
+): MofiRmqOptions {
+  return {
+    urls: getAmqpUrls(config),
+    queue,
+    queueOptions: { durable: true },
+    noAck: true,
+    ...extra,
+  };
 }
+
+/** Producer client: publish to the topic exchange using the event name as routing key. */
+export function buildDomainCommandsProducerOptions(
+  config: ConfigService,
+): MofiRmqOptions {
+  return buildRmqClientOptions(config, MOFI_DOMAIN_COMMANDS_EXCHANGE, {
+    wildcards: true,
+    exchange: MOFI_DOMAIN_COMMANDS_EXCHANGE,
+    exchangeType: 'topic',
+  });
+}
+
+/** Consumer microservice: durable queue bound to `domain.#` on the topic exchange. */
+export function buildDomainCommandsConsumerOptions(
+  config: ConfigService,
+  domain: string,
+): MofiRmqOptions {
+  return buildRmqMicroserviceOptions(
+    config,
+    domainCommandsQueueName(domain),
+    {
+      wildcards: true,
+      exchange: MOFI_DOMAIN_COMMANDS_EXCHANGE,
+      exchangeType: 'topic',
+      routingKey: domainCommandsBindingKey(domain),
+    },
+  );
+}
+

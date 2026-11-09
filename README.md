@@ -17,7 +17,7 @@ NestJS domain services behind a shared edge proxy, using the same URL prefixes a
 | **Single process (host)** | `npm run start:dev` → edge on `:8080` (or `start:dev:developer` for one domain) |
 | **Multi-container Fargate** | `MOFI_CONTAINER_ROLE` per container (`edge`, domain roles, `worker`); see `docker/entrypoint.sh` |
 | **Edge only** | `npm run start:edge` (requires domain upstream env vars) |
-| **Queue worker** | `npm run start:worker` with `MESSAGING_ENABLED=true` |
+| **Platform queue worker** | `npm run start:worker` (notifications + verifier; domain commands run in domain containers) |
 
 ECS always runs **eight containers** per task (edge, six domains, worker). See [infra/aws/README.md](infra/aws/README.md).
 
@@ -34,13 +34,15 @@ Requires Docker, kind, kubectl, Helm, and sibling `../qshelter-auth`. See [infra
 
 Health: `GET http://localhost:8080/health` and `GET http://localhost:8080/{domain}/health`.
 
-OpenAPI (Swagger UI) per domain: `GET http://localhost:8080/{domain}/docs` (via edge). Set `SWAGGER_ENABLED=false` to disable in a process.
+OpenAPI (Swagger UI) per domain: `GET http://localhost:8080/{domain}/docs` (via edge). On by default (including prod for now); set `SWAGGER_ENABLED=false` to disable.
 
 Use repo-root `.env` for host single-process dev; the k8s stack injects env via Helm ConfigMap/Secrets.
 
 **Auth:** Default `AUTH_ENFORCEMENT=local` enables a dev-only JWT guard that mirrors authorizer **public routes** (`libs/auth/src/authorizer-public-routes.ts`). Production ECS uses `AUTH_ENFORCEMENT=gateway` (CDK); JWT is enforced by the **API Gateway authorizer**. See [infra/aws/GATEWAY-AUTH.md](infra/aws/GATEWAY-AUTH.md).
 
-Async messaging in k8s dev is enabled by default (`MESSAGING_ENABLED=true`, async notification/verifier modes in the platform ConfigMap).
+Notifications and verifier lambdas always publish to RabbitMQ; the worker process delivers HTTP notifications and invokes lambdas.
+
+**System e2e:** [`system-tests/`](system-tests/) — run `npm run test:system:deps` (MySQL + RabbitMQ + Mailpit) then `SYSTEM_TESTS_ENABLED=true npm run test:system` (in-process mode boots developer API + worker + notification HTTP shim).
 
 ## Build & run (production container)
 

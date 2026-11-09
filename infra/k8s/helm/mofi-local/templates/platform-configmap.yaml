@@ -10,9 +10,6 @@ metadata:
 data:
   NODE_ENV: development
   AUTH_ENFORCEMENT: local
-  MESSAGING_ENABLED: "true"
-  NOTIFICATION_MODE: async
-  LAMBDA_INVOKE_MODE: async
   DB_HOST: {{ include "mofi-local.mysqlHost" . | quote }}
   DB_PORT: "3306"
   DB_USERNAME: root

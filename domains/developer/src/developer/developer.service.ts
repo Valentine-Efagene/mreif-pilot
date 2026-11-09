@@ -34,7 +34,6 @@ import {
   AsyncJobsService,
   EVENT_DEVELOPER_ASSETS_PURGE,
 } from '../../../../libs/async-jobs/src';
-import { isMessagingEnabled } from '../../../../libs/messaging/src';
 
 const updateOnboardingStage = (onboardingStages: DeveloperOnboardingStage[], stageName: DeveloperOnboardingStageName, completed: boolean) => {
   return onboardingStages.map((stage) => {
@@ -504,10 +503,6 @@ export class DeveloperService {
 
   async remove(id: number): Promise<void> {
     await this.developerRepository.delete(id);
-  }
-
-  shouldPurgeDeveloperAsync(): boolean {
-    return isMessagingEnabled(this.config);
   }
 
   async enqueueDeveloperRemoval(

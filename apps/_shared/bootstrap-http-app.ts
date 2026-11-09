@@ -16,6 +16,11 @@ export async function bootstrapHttpApp(
   options: BootstrapHttpOptions = {},
 ): Promise<INestApplication> {
   normalizeMofiEnv();
+  const role = process.env.MOFI_CONTAINER_ROLE;
+  if (!process.env.MOFI_RUNTIME && role) {
+    process.env.MOFI_RUNTIME =
+      role === 'edge' ? 'edge' : role === 'worker' ? 'worker' : 'domain';
+  }
   const app = await NestFactory.create(module, {
     logger: ['error', 'warn', 'log'],
   });
@@ -45,6 +50,7 @@ export async function bootstrapHttpApp(
       .build();
     const document = SwaggerModule.createDocument(app, config);
     SwaggerModule.setup('docs', app, document, {
+      useGlobalPrefix: Boolean(options.globalPrefix),
       swaggerOptions: { persistAuthorization: true },
     });
   }

@@ -2,10 +2,7 @@ import { Inject, Injectable, Logger } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { firstValueFrom } from 'rxjs';
 import { ConfigService } from '@nestjs/config';
-import {
-  buildEnvelope,
-  isMessagingEnabled,
-} from '../../messaging/src';
+import { buildEnvelope } from '../../messaging/src';
 import { DOMAIN_COMMANDS_CLIENT } from '../../messaging/src/messaging.module';
 
 @Injectable()
@@ -23,10 +20,6 @@ export class AsyncJobsPublisher {
     jobId: string,
     payload: T,
   ): Promise<void> {
-    if (!isMessagingEnabled(this.config)) {
-      throw new Error('MESSAGING_ENABLED must be true to enqueue domain commands');
-    }
-
     const envelope = buildEnvelope(eventName, {
       jobId,
       ...payload,

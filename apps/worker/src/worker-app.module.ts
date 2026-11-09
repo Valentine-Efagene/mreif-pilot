@@ -2,9 +2,11 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { PlatformNotificationsModule } from '../../../libs/notifications/src/notifications.module';
 import { WorkerHealthController } from './worker-health.controller';
-import { DomainCommandsQueueController } from './domain-commands-queue.controller';
-import { DeveloperWorkerModule } from './developer-worker.module';
 
+/**
+ * Platform worker: notification HTTP delivery and verifier Lambda invoke only.
+ * Domain command consumers run in each domain container (see `DOMAIN_COMMAND_CONSUMER_ROLES`).
+ */
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -12,8 +14,7 @@ import { DeveloperWorkerModule } from './developer-worker.module';
       envFilePath: process.env.NODE_ENV === 'production' ? undefined : '.env',
     }),
     PlatformNotificationsModule,
-    DeveloperWorkerModule,
   ],
-  controllers: [WorkerHealthController, DomainCommandsQueueController],
+  controllers: [WorkerHealthController],
 })
 export class WorkerAppModule {}
