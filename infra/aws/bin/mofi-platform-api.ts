@@ -16,5 +16,5 @@ new MofiPlatformApiStack(app, `MofiPlatformApi-${stage}`, {
     ...(account ? { account } : {}),
   },
   stage,
-  description: 'MOFI pilot ECS monolith — Fargate + ALB + ECR',
+  description: 'MOFI Platform API — ECS multicontainer on Fargate + ALB + ECR',
 });

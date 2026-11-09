@@ -4,6 +4,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { buildTypeOrmOptions } from '../../../libs/database/src/typeorm-options';
 import { AGENT_CONNECTION, AGENT_ENTITIES } from '../../../libs/database/src/domain-entities/agent.entities';
 import { UserModule } from './user/user.module';
+import { User } from './user/user.entity';
 import { AgentModule } from './agent/agent.module';
 import { LicensingDocumentModule } from './licensing-document/licensing-document.module';
 import { LicensingInfoModule } from './licensing-info/licensing-info.module';
@@ -28,6 +29,7 @@ import { HealthController } from './health/health.controller';
       useFactory: (config: ConfigService) =>
         buildTypeOrmOptions(config, AGENT_CONNECTION, AGENT_ENTITIES),
     }),
+    TypeOrmModule.forFeature([User], AGENT_CONNECTION),
     UserModule,
     AgentModule,
     LicensingDocumentModule,

@@ -12,7 +12,23 @@ export type MofiRmqOptions = {
 export function getAmqpUrls(config: ConfigService): string[] {
   const url = config.get<string>('AMQP_URL');
   if (url) {
-    return [url.replace(/^amqp\+ssl:/, 'amqps:')];
+    const normalized = url.replace(/^amqp\+ssl:/, 'amqps:');
+    try {
+      const parsed = new URL(normalized);
+      const user = config.get<string>('AMQP_USERNAME', 'mofi');
+      const pass = config.get<string>('AMQP_PASSWORD', '');
+      if (!parsed.username && pass) {
+        parsed.username = user;
+        parsed.password = pass;
+      }
+      const vhost = config.get<string>('AMQP_VHOST', '/');
+      if (!parsed.pathname || parsed.pathname === '/') {
+        parsed.pathname = vhost.startsWith('/') ? vhost : `/${vhost}`;
+      }
+      return [parsed.toString()];
+    } catch {
+      return [normalized];
+    }
   }
   const host = config.get<string>('AMQP_HOST', '127.0.0.1');
   const port = config.get<string>('AMQP_PORT', '5672');

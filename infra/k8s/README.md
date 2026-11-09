@@ -65,7 +65,7 @@ infra/k8s/
 
 ## Monolith escape hatch
 
-Host `npm run start:dev` still runs the unified `apps/api` process; use repo-root `.env` (see `.env.example`). Kubernetes injects env via Helm ConfigMap/Secrets instead.
+Host `npm run start:dev` runs the **edge** process only; for full multicontainer parity use this Helm setup. Use repo-root `.env` (see `.env.example`) when running a single process on the host. Kubernetes injects env via Helm ConfigMap/Secrets instead.
 
 ## Legacy docker compose
 

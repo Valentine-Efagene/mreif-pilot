@@ -2,19 +2,20 @@ import { INestApplication } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Transport } from '@nestjs/microservices';
 import {
+  MOFI_DOMAIN_COMMANDS_QUEUE,
   MOFI_NOTIFICATIONS_QUEUE,
   MOFI_VERIFIER_LAMBDA_QUEUE,
   buildRmqMicroserviceOptions,
   isMessagingEnabled,
 } from '../../libs/messaging/src';
 
-export type WorkerQueues = 'notifications' | 'verifier' | 'all';
+export type WorkerQueues = 'notifications' | 'verifier' | 'domain' | 'all';
 
 export function shouldStartQueueConsumers(config: ConfigService): boolean {
   if (!isMessagingEnabled(config)) {
     return false;
   }
-  const runtime = config.get<string>('MOFI_RUNTIME', 'monolith');
+  const runtime = config.get<string>('MOFI_RUNTIME', 'domain');
   if (runtime === 'edge' || runtime === 'domain') {
     return false;
   }
@@ -46,6 +47,13 @@ export async function connectMofiMicroservices(
     app.connectMicroservice({
       transport: Transport.RMQ,
       options: buildRmqMicroserviceOptions(config, MOFI_VERIFIER_LAMBDA_QUEUE),
+    });
+  }
+
+  if (worker === 'all' || worker === 'domain') {
+    app.connectMicroservice({
+      transport: Transport.RMQ,
+      options: buildRmqMicroserviceOptions(config, MOFI_DOMAIN_COMMANDS_QUEUE),
     });
   }
 

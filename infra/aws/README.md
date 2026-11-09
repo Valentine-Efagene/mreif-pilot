@@ -1,6 +1,6 @@
 # MOFI Platform API — AWS CDK
 
-Deploys ECS Fargate, ALB, ECR, Secrets Manager, and CloudWatch logs for the pilot monolith.
+Deploys MOFI Platform API on ECS Fargate (eight containers per task), ALB, ECR, RDS, Amazon MQ, S3, Secrets Manager, and CloudWatch logs.
 
 ## Prerequisites
 
@@ -35,11 +35,9 @@ Populate secrets:
 - `mofi-platform-api/{stage}/app` — JWT (`JWT_SECRET` generated on create)
 - `mofi-platform-api/{stage}/rabbitmq` — Amazon MQ password (username `mofi`)
 
-Deploy modes:
+Deploy:
 
-- `npx cdk deploy -c stage=dev` — **monolith** Fargate + RDS MySQL (default for dev; fits one task)
-- `npx cdk deploy -c stage=dev -c deploymentMode=multicontainer` — 8-container task (needs large Fargate size)
-
+- `npx cdk deploy -c stage=dev` — multicontainer Fargate task (60 GiB / 8 vCPU) + RDS MySQL
 Cutover runbook: [CUTOVER.md](./CUTOVER.md)
 
 Gateway authorizer + Fargate: [GATEWAY-AUTH.md](./GATEWAY-AUTH.md)

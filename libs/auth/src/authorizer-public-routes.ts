@@ -14,6 +14,12 @@ export const AUTHORIZER_PUBLIC_PATHS: readonly string[] = [
   '/developer/developers/names',
   '/cooperative/cooperatives/names',
   '/cooperative/auth/login',
+  '/agent/docs',
+  '/pmb/docs',
+  '/rsa/docs',
+  '/developer/docs',
+  '/uploader/docs',
+  '/cooperative/docs',
 ];
 
 export function isAuthorizerPublicPath(path: string): boolean {

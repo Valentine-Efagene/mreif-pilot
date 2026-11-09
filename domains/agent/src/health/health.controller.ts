@@ -1,10 +1,12 @@
 import { Controller, Get, HttpStatus } from '@nestjs/common';
+import { Public } from '../../../../libs/auth/src/public.decorator';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { StandardApiResponse } from '../common/common.dto';
 
 @Controller('health')
 @ApiTags('Health')
 export class HealthController {
+  @Public()
   @Get()
   @ApiOperation({ summary: 'Health check endpoint' })
   @ApiResponse({ status: 200, description: 'Service is healthy' })
@@ -40,10 +42,10 @@ export class HealthController {
         status: 'connected',
         message: 'Database connection available'
       };
-    } catch (error) {
+    } catch (error: unknown) {
       return {
         status: 'error',
-        message: error.message
+        message: error instanceof Error ? error.message : String(error),
       };
     }
   }

@@ -1,18 +1,17 @@
-import * as Joi from 'joi';
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { MofiAuthModule } from '../../../libs/auth/src/auth.module';
 import { PlatformNotificationsModule } from '../../../libs/notifications/src/notifications.module';
-import { PmbDomainModule } from '../../../domains/pmb/src/pmb-domain.module';
 import { createDomainHealthController } from '../../../libs/common/src/domain-health.controller';
+import { RsaDomainModule } from './rsa-domain.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
     MofiAuthModule.forRoot(),
     PlatformNotificationsModule,
-    PmbDomainModule,
+    RsaDomainModule,
   ],
-  controllers: [createDomainHealthController('pmb')],
+  controllers: [createDomainHealthController('rsa')],
 })
-export class PmbAppModule {}
+export class RsaAppModule {}

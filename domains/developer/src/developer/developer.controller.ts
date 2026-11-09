@@ -15,6 +15,7 @@ import {
   ParseIntPipe,
   HttpCode,
   Req,
+  Headers,
 } from '@nestjs/common';
 import { Developer } from './developer.entity';
 import { DeveloperService } from './developer.service';
@@ -210,7 +211,20 @@ export class DeveloperController {
   @ApiHeader(OpenApiHelper.userIdHeader)
   @ApiOperation({ summary: '', tags: ['Admin'] })
   async remove(
-    @Param('id', ParseIntPipe) id: number): Promise<StandardApiResponse<void>> {
+    @Param('id', ParseIntPipe) id: number,
+    @Headers('idempotency-key') idempotencyKey?: string,
+  ): Promise<StandardApiResponse<void | { jobId: string; statusUrl: string }>> {
+    if (this.developerService.shouldPurgeDeveloperAsync()) {
+      const asyncJob = await this.developerService.enqueueDeveloperRemoval(
+        id,
+        idempotencyKey,
+      );
+      return new StandardApiResponse(
+        HttpStatus.ACCEPTED,
+        'Deletion queued',
+        asyncJob,
+      );
+    }
     await this.developerService.remove(id);
     return new StandardApiResponse(HttpStatus.OK, ResponseMessage.DELETED, null);
   }

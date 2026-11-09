@@ -1,8 +1,8 @@
 /**
- * Pilot route contract derived from MofixQshelter_admin/src/redux/services/api.ts
- * and MOFI API Gateway base paths. Used to guard regressions during Lambda → ECS migration.
+ * Domain route contract derived from MofixQshelter_admin API clients
+ * and MOFI API Gateway base paths.
  */
-export const PILOT_ROUTE_CONTRACT: Array<{ method: string; path: string }> = [
+export const DOMAIN_ROUTE_CONTRACT: Array<{ method: string; path: string }> = [
   { method: 'POST', path: '/uploader/document' },
   { method: 'POST', path: '/uploader/document/presign' },
   { method: 'POST', path: '/uploader/document/bundle' },
@@ -33,6 +33,11 @@ export const PILOT_ROUTE_CONTRACT: Array<{ method: string; path: string }> = [
   { method: 'POST', path: '/cooperative/auth/login' },
   { method: 'GET', path: '/health' },
   { method: 'GET', path: '/agent/health' },
+  { method: 'GET', path: '/developer/health' },
+  { method: 'GET', path: '/pmb/health' },
+  { method: 'GET', path: '/rsa/health' },
+  { method: 'GET', path: '/uploader/health' },
+  { method: 'GET', path: '/cooperative/health' },
 ];
 
 export const DOMAIN_BASE_PATHS = [

@@ -1,4 +1,5 @@
 import { BadRequestException, Injectable, Logger, NotFoundException, UnprocessableEntityException } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository, In } from 'typeorm';
 import { Developer } from './developer.entity';
@@ -28,6 +29,12 @@ import { DeveloperOnboardingStageName } from './developer.enums';
 import { DeveloperDirector } from '../developer-director/developer-director.entity';
 import { DeveloperPoc } from '../developer-poc/developer-poc.entity';
 import { Request } from 'express';
+import {
+  AsyncJobsPublisher,
+  AsyncJobsService,
+  EVENT_DEVELOPER_ASSETS_PURGE,
+} from '../../../../libs/async-jobs/src';
+import { isMessagingEnabled } from '../../../../libs/messaging/src';
 
 const updateOnboardingStage = (onboardingStages: DeveloperOnboardingStage[], stageName: DeveloperOnboardingStageName, completed: boolean) => {
   return onboardingStages.map((stage) => {
@@ -64,6 +71,12 @@ export class DeveloperService {
     private readonly notificationService: NotificationService,
 
     private readonly userService: UserService,
+
+    private readonly config: ConfigService,
+
+    private readonly asyncJobs: AsyncJobsService,
+
+    private readonly asyncJobsPublisher: AsyncJobsPublisher,
 
     @InjectDataSource('developer')
     private dataSource: DataSource,
@@ -491,6 +504,44 @@ export class DeveloperService {
 
   async remove(id: number): Promise<void> {
     await this.developerRepository.delete(id);
+  }
+
+  shouldPurgeDeveloperAsync(): boolean {
+    return isMessagingEnabled(this.config);
+  }
+
+  async enqueueDeveloperRemoval(
+    id: number,
+    idempotencyKey?: string,
+  ): Promise<{ jobId: string; statusUrl: string }> {
+    const developer = await this.developerRepository.findOne({ where: { id } });
+    if (!developer) {
+      throw new NotFoundException(`Developer ${id} not found`);
+    }
+
+    const job = await this.asyncJobs.createJob({
+      domain: 'developer',
+      eventName: EVENT_DEVELOPER_ASSETS_PURGE,
+      resourceType: 'developer',
+      resourceId: String(id),
+      idempotencyKey,
+      steps: [
+        { id: 'collect', label: 'Collect attached assets' },
+        { id: 'database', label: 'Remove database records' },
+        { id: 's3', label: 'Purge object storage' },
+        { id: 'finalize', label: 'Finalize deletion' },
+      ],
+      payload: { developerId: id },
+    });
+
+    await this.asyncJobsPublisher.publish(EVENT_DEVELOPER_ASSETS_PURGE, job.id, {
+      developerId: id,
+    });
+
+    return {
+      jobId: job.id,
+      statusUrl: `/developer/async-jobs/${job.id}`,
+    };
   }
 
   async getMailList(developerId: number): Promise<{ name: string, email: string }[]>;

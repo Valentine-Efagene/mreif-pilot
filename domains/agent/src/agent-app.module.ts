@@ -3,7 +3,7 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { MofiAuthModule } from '../../../libs/auth/src/auth.module';
 import { PlatformNotificationsModule } from '../../../libs/notifications/src/notifications.module';
-import { AgentDomainModule } from '../../../domains/agent/src/agent-domain.module';
+import { AgentDomainModule } from './agent-domain.module';
 
 @Module({
   imports: [

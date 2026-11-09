@@ -1,12 +1,14 @@
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { ConfigService } from '@nestjs/config';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { normalizeMofiEnv } from '../../libs/database/src/normalize-env';
 import { connectMofiMicroservices } from './connect-microservices';
 
 export type BootstrapHttpOptions = {
   globalPrefix?: string;
   enableSwagger?: boolean;
+  swaggerTitle?: string;
 };
 
 export async function bootstrapHttpApp(
@@ -26,6 +28,25 @@ export async function bootstrapHttpApp(
 
   if (options.globalPrefix) {
     app.setGlobalPrefix(options.globalPrefix);
+  }
+
+  const swaggerEnabled =
+    options.enableSwagger ??
+    process.env.SWAGGER_ENABLED !== 'false';
+  if (swaggerEnabled) {
+    const domainLabel = options.globalPrefix ?? 'platform';
+    const title =
+      options.swaggerTitle ?? `MOFI ${domainLabel} API`;
+    const config = new DocumentBuilder()
+      .setTitle(title)
+      .setDescription(`MOFI Platform API — ${domainLabel} domain`)
+      .setVersion('1.0')
+      .addBearerAuth()
+      .build();
+    const document = SwaggerModule.createDocument(app, config);
+    SwaggerModule.setup('docs', app, document, {
+      swaggerOptions: { persistAuthorization: true },
+    });
   }
 
   app.useGlobalPipes(

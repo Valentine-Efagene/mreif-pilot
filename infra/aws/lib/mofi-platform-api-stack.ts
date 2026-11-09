@@ -26,8 +26,7 @@ type ContainerRole =
   | 'developer'
   | 'uploader'
   | 'cooperative'
-  | 'worker'
-  | 'api';
+  | 'worker';
 
 const MULTI_CONTAINER_ROLES: Array<{
   role: ContainerRole;
@@ -51,9 +50,6 @@ export class MofiPlatformApiStack extends cdk.Stack {
     super(scope, id, props);
 
     const { stage } = props;
-    const deploymentMode =
-      this.node.tryGetContext('deploymentMode') ??
-      (stage === 'main' ? 'multicontainer' : 'monolith');
 
     const vpc = new ec2.Vpc(this, 'Vpc', {
       maxAzs: 2,
@@ -187,12 +183,10 @@ export class MofiPlatformApiStack extends cdk.Stack {
       }),
     );
 
-    const isMulti = deploymentMode === 'multicontainer';
     const taskDefinition = new ecs.FargateTaskDefinition(this, 'TaskDef', {
-      // Eight Nest processes on one task; 4 GiB was tight (exit 137).
-      // Monolith loads five TypeORM connections; 8 GiB avoids OOM during synchronize.
-      memoryLimitMiB: isMulti ? 16384 : 8192,
-      cpu: isMulti ? 4096 : 2048,
+      // Eight Node processes share task memory; 16 GiB caused exit 137 during parallel TypeORM startup.
+      memoryLimitMiB: stage === 'main' ? 30720 : 61440,
+      cpu: stage === 'main' ? 4096 : 8192,
       taskRole,
     });
 
@@ -207,7 +201,9 @@ export class MofiPlatformApiStack extends cdk.Stack {
       MESSAGING_ENABLED: 'true',
       NOTIFICATION_MODE: 'async',
       LAMBDA_INVOKE_MODE: 'async',
-      TYPEORM_SYNCHRONIZE: stage === 'main' ? 'false' : 'true',
+      // Never run schema sync from eight containers against one RDS task (race + memory spike).
+      TYPEORM_SYNCHRONIZE: 'false',
+      NODE_OPTIONS: '--max-old-space-size=1400',
       AMQP_VHOST: '/',
       AMQP_USERNAME: 'mofi',
       AMQP_URL: cdk.Token.asString(cdk.Fn.select(0, broker.attrAmqpEndpoints)),
@@ -259,7 +255,7 @@ export class MofiPlatformApiStack extends cdk.Stack {
           interval: cdk.Duration.seconds(30),
           timeout: cdk.Duration.seconds(5),
           retries: 3,
-          startPeriod: cdk.Duration.seconds(isMulti ? 180 : 300),
+          startPeriod: cdk.Duration.seconds(240),
         },
       });
       if (exposePort) {
@@ -268,37 +264,28 @@ export class MofiPlatformApiStack extends cdk.Stack {
       return container;
     };
 
-    if (isMulti) {
-      for (const spec of MULTI_CONTAINER_ROLES) {
-        const extraEnv: Record<string, string> = {
-          MOFI_RUNTIME: spec.role === 'edge' ? 'edge' : spec.role === 'worker' ? 'worker' : 'domain',
-          MOFI_WORKER_QUEUES: spec.role === 'worker' ? 'all' : 'none',
-        };
-        if (spec.role === 'edge') {
-          extraEnv.AGENT_UPSTREAM = 'http://127.0.0.1:3001';
-          extraEnv.PMB_UPSTREAM = 'http://127.0.0.1:3002';
-          extraEnv.RSA_UPSTREAM = 'http://127.0.0.1:3003';
-          extraEnv.DEVELOPER_UPSTREAM = 'http://127.0.0.1:3004';
-          extraEnv.UPLOADER_UPSTREAM = 'http://127.0.0.1:3005';
-          extraEnv.COOPERATIVE_UPSTREAM = 'http://127.0.0.1:3006';
-        }
-        addContainer(
-          spec.role,
-          spec.role,
-          spec.port,
-          spec.essential,
-          spec.exposePort,
-          spec.healthPath,
-          extraEnv,
-        );
+    for (const spec of MULTI_CONTAINER_ROLES) {
+      const extraEnv: Record<string, string> = {
+        MOFI_RUNTIME: spec.role === 'edge' ? 'edge' : spec.role === 'worker' ? 'worker' : 'domain',
+        MOFI_WORKER_QUEUES: spec.role === 'worker' ? 'all' : 'none',
+      };
+      if (spec.role === 'edge') {
+        extraEnv.AGENT_UPSTREAM = 'http://127.0.0.1:3001';
+        extraEnv.PMB_UPSTREAM = 'http://127.0.0.1:3002';
+        extraEnv.RSA_UPSTREAM = 'http://127.0.0.1:3003';
+        extraEnv.DEVELOPER_UPSTREAM = 'http://127.0.0.1:3004';
+        extraEnv.UPLOADER_UPSTREAM = 'http://127.0.0.1:3005';
+        extraEnv.COOPERATIVE_UPSTREAM = 'http://127.0.0.1:3006';
       }
-    } else {
-      addContainer('ApiContainer', 'api', 8080, true, true, '/health', {
-        MOFI_RUNTIME: 'monolith',
-        MESSAGING_ENABLED: 'false',
-        NOTIFICATION_MODE: 'sync',
-        LAMBDA_INVOKE_MODE: 'sync',
-      });
+      addContainer(
+        spec.role,
+        spec.role,
+        spec.port,
+        spec.essential,
+        spec.exposePort,
+        spec.healthPath,
+        extraEnv,
+      );
     }
 
     const service = new ecs.FargateService(this, 'Service', {
@@ -307,8 +294,8 @@ export class MofiPlatformApiStack extends cdk.Stack {
       desiredCount: stage === 'main' ? 2 : 1,
       assignPublicIp: true,
       securityGroups: [taskSg],
-      circuitBreaker: { rollback: true },
-      healthCheckGracePeriod: cdk.Duration.seconds(isMulti ? 300 : 600),
+      circuitBreaker: { rollback: stage === 'main' },
+      healthCheckGracePeriod: cdk.Duration.seconds(420),
     });
 
     service.node.addDependency(broker);
@@ -343,6 +330,6 @@ export class MofiPlatformApiStack extends cdk.Stack {
     new cdk.CfnOutput(this, 'DbEndpoint', { value: database.dbInstanceEndpointAddress });
     new cdk.CfnOutput(this, 'UploadsBucketName', { value: uploadsBucket.bucketName });
     new cdk.CfnOutput(this, 'BrokerSecretArn', { value: brokerSecret.secretArn });
-    new cdk.CfnOutput(this, 'DeploymentMode', { value: deploymentMode });
+    new cdk.CfnOutput(this, 'RuntimeLayout', { value: 'multicontainer' });
   }
 }

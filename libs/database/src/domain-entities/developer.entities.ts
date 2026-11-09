@@ -10,8 +10,10 @@ import { ProposedDevelopment } from '../../../../domains/developer/src/proposed-
 import { ProposedDevelopmentDocument } from '../../../../domains/developer/src/proposed-development-document/proposed-development-document.entity';
 import { ProposedProperty } from '../../../../domains/developer/src/proposed-property/proposed-property.entity';
 import { Wallet } from '../../../../domains/developer/src/wallet/wallet.entity';
+import { AsyncJob } from '../../../async-jobs/src/async-job.entity';
 
 export const DEVELOPER_ENTITIES = [
+  AsyncJob,
   User,
   Developer,
   DeveloperDirector,

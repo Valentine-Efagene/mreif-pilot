@@ -32,6 +32,9 @@ async function bootstrap() {
       createProxyMiddleware({
         target,
         changeOrigin: true,
+        // Preserve domain global prefix on upstream (mount strips it from req.url).
+        pathRewrite: (path) =>
+          path.startsWith(route.prefix) ? path : `${route.prefix}${path}`,
       }),
     );
     logger.log(`Proxy ${route.prefix} → ${target}`);

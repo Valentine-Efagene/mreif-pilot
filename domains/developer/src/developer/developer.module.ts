@@ -1,4 +1,6 @@
 import { Module } from '@nestjs/common';
+import { DEVELOPER_CONNECTION } from '../../../../libs/database/src/domain-entities/developer.entities';
+import { AsyncJobsModule, createAsyncJobsController } from '../../../../libs/async-jobs/src';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Developer } from './developer.entity';
 import { DeveloperController } from './developer.controller';
@@ -12,9 +14,18 @@ import { UserModule } from '../user/user.module';
 import { User } from '../user/user.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Developer, ProposedDevelopment, Wallet, User], 'developer'), S3UploaderModule, NotificationModule, UserModule],
+  imports: [
+    TypeOrmModule.forFeature([Developer, ProposedDevelopment, Wallet, User], 'developer'),
+    AsyncJobsModule.forRoot({ connectionName: DEVELOPER_CONNECTION }),
+    S3UploaderModule,
+    NotificationModule,
+    UserModule,
+  ],
   providers: [DeveloperService, DeveloperRepository],
-  controllers: [DeveloperController],
+  controllers: [
+    DeveloperController,
+    createAsyncJobsController('developer', 'Developer async jobs'),
+  ],
   exports: [DeveloperService],
 })
 export class DeveloperModule { }

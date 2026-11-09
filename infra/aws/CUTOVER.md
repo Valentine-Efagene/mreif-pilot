@@ -1,4 +1,4 @@
-# MOFI pilot cutover runbook (Level 1)
+# MOFI platform cutover runbook (Level 1)
 
 Phases align with the MOFI ECS migration infrastructure brief (build → staging → shadow → cutover → soak).
 
@@ -52,8 +52,8 @@ At API Gateway or DNS, route only these base paths to the ALB target:
 
 Leave all other paths on existing Lambdas.
 
-Rollback: revert gateway/DNS mapping for pilot paths only.
+Rollback: revert gateway/DNS mapping for MOFI domain paths only.
 
 ## Phase 4 — Soak
 
-Monitor ECS logs (`/ecs/mofi-platform-api-{stage}`), error rates, and auth 401/403 spikes. Retire pilot Lambdas after agreed soak window; keep ECR images for rollback.
+Monitor ECS logs (`/ecs/mofi-platform-api-{stage}`), error rates, and auth 401/403 spikes. Retire superseded Lambdas after agreed soak window; keep ECR images for rollback.
