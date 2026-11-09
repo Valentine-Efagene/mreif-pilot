@@ -1,5 +1,6 @@
 import { waitForTcp } from './support/wait-for-tcp';
 import { applyAmqpTestEnv } from './support/messaging-test-env';
+import { assertRealNotificationsAllowed } from './support/notification-test-config';
 
 export default async function globalSetup(): Promise<void> {
   if (process.env.SYSTEM_TESTS_ENABLED !== 'true') {
@@ -9,6 +10,7 @@ export default async function globalSetup(): Promise<void> {
   process.env.AUTH_ENFORCEMENT = 'gateway';
   process.env.admin_dashboard_url = 'https://admin.stub.mofi';
   applyAmqpTestEnv();
+  assertRealNotificationsAllowed();
 
   const dbHost = process.env.SYSTEM_TEST_DB_HOST ?? '127.0.0.1';
   const dbPort = Number(process.env.SYSTEM_TEST_DB_PORT ?? 3308);

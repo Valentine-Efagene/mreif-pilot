@@ -45,11 +45,17 @@ describeFn(scenarioName, () => {
         const client = createInProcessClient(booted.app);
         const flow = await runDeveloperOnboardingFlow(client, {
           shim: booted.shim,
+          notificationTarget: booted.notificationTarget,
+          queueBaseline: booted.queueBaseline,
+          expectedNotificationMessages: 1,
         });
         report.steps = flow.steps;
         report.notes?.push(
-          `developerId=${flow.developerId}, userId=${flow.userId}, pm=${flow.projectManagerEmail}`,
+          `developerId=${flow.developerId}, userId=${flow.userId}, pm=${flow.projectManagerEmail}, notificationTarget=${booted.notificationTarget}`,
         );
+        if (flow.manualInboxNote) {
+          report.notes?.push(flow.manualInboxNote);
+        }
       } else {
         const client = createHttpClient(process.env.MOFI_PLATFORM_API_URL!);
         const flow = await runDeveloperOnboardingFlow(client);

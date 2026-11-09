@@ -15,23 +15,34 @@ Every `REPORT.md` includes a Mermaid **milestone flow** so failures show exactly
 **In-process (default when enabled):**
 
 ```bash
-npm run test:system:deps   # MySQL :3308 + Mailpit :8025
+npm run test:system:deps   # MySQL :3308 + RabbitMQ :5673 (+ optional Mailpit :8025)
 SYSTEM_TESTS_ENABLED=true npm run test:system
 ```
 
-Uses `AUTH_ENFORCEMENT=gateway`, sync notifications, and **stubbed** `PlatformNotificationService` by default.
+Uses `AUTH_ENFORCEMENT=gateway`, RabbitMQ (`mofi.notifications.commands`), and in-process **developer API + worker**.
 
-**Notifications**
+Rabbit management UI (local test compose): http://localhost:15673 (`mofi` / `mofi`, vhost `mofi`)
+
+## Notifications (in-process)
 
 | Mode | Env | Behaviour |
 |------|-----|-----------|
-| Stub (default) | — | In-memory capture; asserts `/admin/developer-company-registration` |
-| HTTP shim | `SYSTEM_TEST_NOTIFICATIONS=http` | Real `PlatformNotificationService` → local shim |
-| Mailpit | `SYSTEM_TEST_NOTIFICATIONS=http` + `SYSTEM_TEST_MAILPIT=true` | Shim relays to Mailpit API; asserts inbox |
+| **Shim (default)** | — | Worker POSTs to local HTTP shim; assert `/admin/developer-company-registration` |
+| **Real testnotify** | `SYSTEM_TEST_NOTIFICATION_TARGET=real` + `SYSTEM_TEST_ALLOW_REAL_NOTIFICATIONS=true` | Worker POSTs to `https://api.qshelter.ng/testnotify/email` (override with `NOTIFICATION_URL`); assert **Rabbit queue consumed/acked**; **manual** inbox check (default PM/developer email `efagenevalentine@gmail.com`) |
+| **Mailpit (shim only)** | `SYSTEM_TEST_MAILPIT=true` | Optional relay from shim into Mailpit API; not used with real testnotify |
 
-Mailpit UI: http://localhost:8025
+Real testnotify example:
 
-**HTTP (optional):**
+```bash
+npm run test:system:deps
+export SYSTEM_TESTS_ENABLED=true
+export SYSTEM_TEST_NOTIFICATION_TARGET=real
+export SYSTEM_TEST_ALLOW_REAL_NOTIFICATIONS=true
+# optional: export SYSTEM_TEST_NOTIFICATION_AUTH='Bearer …'
+npm run test:system
+```
+
+## HTTP (optional)
 
 ```bash
 export MOFI_PLATFORM_API_URL=http://localhost:8080

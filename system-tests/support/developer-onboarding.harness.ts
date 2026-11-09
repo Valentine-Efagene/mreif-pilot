@@ -15,6 +15,19 @@ import {
 } from './stubs/external-registration.stub';
 import { createLambdaInvokeStub } from './stubs/lambda-invoke.stub';
 import { applyAmqpTestEnv, waitForShimPath } from './messaging-test-env';
+import {
+  assertRealNotificationsAllowed,
+  NotificationTarget,
+  resolveNotificationTarget,
+  resolveRealNotificationBaseUrl,
+  systemTestProjectManagerEmail,
+} from './notification-test-config';
+import {
+  fetchNotificationQueueSnapshot,
+  purgeNotificationsQueue,
+  QueueSnapshot,
+  waitForNotificationQueueConsumed,
+} from './rabbitmq-test-helpers';
 import { StepResult } from './report-writer';
 import { httpTestClient } from './http-test-client';
 import {
@@ -29,6 +42,7 @@ export type OnboardingFlowResult = {
   developerId: number;
   projectManagerEmail?: string;
   steps: StepResult[];
+  manualInboxNote?: string;
 };
 
 export type DeveloperOnboardingClient = {
@@ -47,7 +61,9 @@ export type DeveloperOnboardingClient = {
 export type DeveloperAppBoot = {
   app: INestApplication;
   workerApp: INestApplication;
-  shim: Awaited<ReturnType<typeof startNotificationShim>>;
+  notificationTarget: NotificationTarget;
+  shim?: Awaited<ReturnType<typeof startNotificationShim>>;
+  queueBaseline: QueueSnapshot;
   cleanup: () => Promise<void>;
 };
 
@@ -58,7 +74,7 @@ function applyInProcessTestEnv(): void {
   process.env.AUTH_ENFORCEMENT = 'gateway';
   applyAmqpTestEnv();
   process.env.admin_dashboard_url = 'https://admin.stub.mofi';
-  process.env.app = process.env.app ?? 'QSHELTER';
+  process.env.app = process.env.app ?? 'mofi';
   process.env.MOFI_CONTAINER_ROLE = 'developer';
   process.env.MOFI_RUNTIME = 'domain';
   process.env.DB_HOST = process.env.SYSTEM_TEST_DB_HOST ?? '127.0.0.1';
@@ -71,12 +87,34 @@ function applyInProcessTestEnv(): void {
   process.env.NODE_ENV = 'test';
 }
 
+/** `EnvironmentHelper.env` is fixed at first import; keep it in sync for dynamic test URLs. */
+async function syncDeveloperNotificationUrl(baseUrl: string): Promise<void> {
+  process.env.NOTIFICATION_URL = baseUrl;
+  process.env.notification_url = baseUrl;
+  const { default: EnvironmentHelper } = await import(
+    '../../domains/developer/src/common/helpers/EnvironmentHelper'
+  );
+  EnvironmentHelper.env.notification_url = baseUrl;
+}
+
 export async function bootInProcessDeveloperApp(): Promise<DeveloperAppBoot> {
   applyInProcessTestEnv();
+  assertRealNotificationsAllowed();
 
-  const shim = await startNotificationShim();
-  process.env.NOTIFICATION_URL = shim.baseUrl;
-  process.env.notification_url = shim.baseUrl;
+  const notificationTarget = resolveNotificationTarget();
+  let shim: Awaited<ReturnType<typeof startNotificationShim>> | undefined;
+
+  if (notificationTarget === 'shim') {
+    shim = await startNotificationShim();
+    await syncDeveloperNotificationUrl(shim.baseUrl);
+  } else {
+    const baseUrl = resolveRealNotificationBaseUrl();
+    await syncDeveloperNotificationUrl(baseUrl);
+    // eslint-disable-next-line no-console
+    console.warn(
+      `[system-test] real testnotify baseUrl=${baseUrl} (manual inbox check required)`,
+    );
+  }
 
   const lambdaStub = createLambdaInvokeStub();
 
@@ -94,10 +132,15 @@ export async function bootInProcessDeveloperApp(): Promise<DeveloperAppBoot> {
     .useValue(lambdaStub)
     .compile();
 
+  await purgeNotificationsQueue();
+
   const workerApp = workerFixture.createNestApplication();
   await workerApp.init();
   const workerConfig = workerApp.get(ConfigService);
   await connectMofiMicroservices(workerApp, workerConfig);
+
+  await purgeNotificationsQueue();
+  const queueBaseline = await fetchNotificationQueueSnapshot();
 
   process.env.MOFI_RUNTIME = 'domain';
   process.env.MOFI_CONTAINER_ROLE = 'developer';
@@ -126,11 +169,13 @@ export async function bootInProcessDeveloperApp(): Promise<DeveloperAppBoot> {
   return {
     app,
     workerApp,
+    notificationTarget,
     shim,
+    queueBaseline,
     cleanup: async () => {
       await app.close();
       await workerApp.close();
-      await shim.close();
+      await shim?.close();
     },
   };
 }
@@ -312,6 +357,9 @@ const REQUIRED_STAGES = Object.values(DeveloperOnboardingStageName);
 
 export type NotificationCheckContext = {
   shim?: { calls: ShimCapturedCall[] };
+  notificationTarget?: NotificationTarget;
+  queueBaseline?: QueueSnapshot;
+  expectedNotificationMessages?: number;
   projectManagerEmail?: string;
 };
 
@@ -367,7 +415,19 @@ export async function runDeveloperOnboardingFlow(
   });
 
   const shimCalls = notificationCtx.shim?.calls ?? [];
-  if (notificationCtx.shim) {
+  if (notificationCtx.notificationTarget === 'real' && notificationCtx.queueBaseline) {
+    const expected = notificationCtx.expectedNotificationMessages ?? 1;
+    const final = await waitForNotificationQueueConsumed(
+      notificationCtx.queueBaseline,
+      expected,
+    );
+    const ackDelta = final.ackTotal - notificationCtx.queueBaseline.ackTotal;
+    steps.push({
+      name: 'Company registration notification (RMQ consumed → testnotify)',
+      status: 'passed',
+      detail: `mofi.notifications.commands ackDelta=${ackDelta}, ready=${final.messages_ready}, unacked=${final.messages_unacknowledged}`,
+    });
+  } else if (notificationCtx.shim) {
     await waitForShimPath(
       shimCalls,
       '/admin/developer-company-registration',
@@ -385,7 +445,19 @@ export async function runDeveloperOnboardingFlow(
     }
   }
 
+  let manualInboxNote: string | undefined;
+  if (notificationCtx.notificationTarget === 'real') {
+    const inbox = systemTestProjectManagerEmail();
+    manualInboxNote = `Manual: check inbox ${inbox} for company registration template.`;
+    steps.push({
+      name: 'Company registration email (manual inbox check)',
+      status: 'passed',
+      detail: manualInboxNote,
+    });
+  }
+
   if (
+    notificationCtx.notificationTarget !== 'real' &&
     process.env.SYSTEM_TEST_MAILPIT === 'true' &&
     (await isMailpitReachable())
   ) {
@@ -406,7 +478,7 @@ export async function runDeveloperOnboardingFlow(
     if (!delivered) {
       throw new Error(`Mailpit did not receive email for ${pmEmail}`);
     }
-  } else if (!notificationCtx.shim) {
+  } else if (!notificationCtx.shim && notificationCtx.notificationTarget !== 'real') {
     steps.push({
       name: 'Company registration notification (RMQ → worker → HTTP)',
       status: 'skipped',
@@ -419,5 +491,6 @@ export async function runDeveloperOnboardingFlow(
     developerId,
     projectManagerEmail,
     steps,
+    manualInboxNote,
   };
 }

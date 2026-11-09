@@ -7,8 +7,8 @@
 | **Overall** | **PASSED** |
 | Failed at | — |
 | Milestones passed | 6 / 6 |
-| Started | 2026-11-09T11:46:14.551Z |
-| Finished | 2026-11-09T11:46:24.987Z |
+| Started | 2026-11-09T13:07:23.689Z |
+| Finished | 2026-11-09T13:07:25.476Z |
 
 ## Milestone flow
 
@@ -48,9 +48,9 @@ flowchart TD
 
 | # | Milestone | Status | Detail |
 |---|-----------|--------|--------|
-| 1 | Stub project manager (admin notification audience) | ✅ passed | pm+etgfl5@system-tests.mofi |
-| 2 | Stub external registration (POST /developer/users) | ✅ passed | userId=12, email=developer-onboarding+nc1wotuz@system-tests.mofi |
-| 3 | Complete developer onboarding (POST /developer/developers) | ✅ passed | developerId=6 |
+| 1 | Stub project manager (admin notification audience) | ✅ passed | pm+fadnbf@system-tests.mofi |
+| 2 | Stub external registration (POST /developer/users) | ✅ passed | userId=28, email=developer-onboarding+wdg0igfk@system-tests.mofi |
+| 3 | Complete developer onboarding (POST /developer/developers) | ✅ passed | developerId=14 |
 | 4 | Fetch developer by user (GET /developer/developers/by-user/:id) | ✅ passed |  |
 | 5 | All onboarding stages marked complete | ✅ passed | BUSINESS_DETAILS, GROUP_ENTITIES, DEVELOPER_DOCUMENTS, BANK_INFORMATION, DIRECTORS_FORM, TERMS_AND_CONDITION |
 | 6 | Company registration notification (RMQ → worker → HTTP) | ✅ passed | /admin/developer-company-registration |
@@ -70,15 +70,15 @@ START
 
 ## Step log
 
-- **Stub project manager (admin notification audience)** — passed: pm+etgfl5@system-tests.mofi
-- **Stub external registration (POST /developer/users)** — passed: userId=12, email=developer-onboarding+nc1wotuz@system-tests.mofi
-- **Complete developer onboarding (POST /developer/developers)** — passed: developerId=6
+- **Stub project manager (admin notification audience)** — passed: pm+fadnbf@system-tests.mofi
+- **Stub external registration (POST /developer/users)** — passed: userId=28, email=developer-onboarding+wdg0igfk@system-tests.mofi
+- **Complete developer onboarding (POST /developer/developers)** — passed: developerId=14
 - **Fetch developer by user (GET /developer/developers/by-user/:id)** — passed
 - **All onboarding stages marked complete** — passed: BUSINESS_DETAILS, GROUP_ENTITIES, DEVELOPER_DOCUMENTS, BANK_INFORMATION, DIRECTORS_FORM, TERMS_AND_CONDITION
 - **Company registration notification (RMQ → worker → HTTP)** — passed: /admin/developer-company-registration
 
 ## Notes
 
-- developerId=6, userId=12, pm=pm+etgfl5@system-tests.mofi
+- developerId=14, userId=28, pm=pm+fadnbf@system-tests.mofi, notificationTarget=shim
 
 _This file is overwritten on each test run. Every scenario report includes a milestone flow chart._

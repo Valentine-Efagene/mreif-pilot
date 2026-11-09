@@ -7,6 +7,18 @@ export function applyAmqpTestEnv(): void {
   process.env.AMQP_VHOST = process.env.AMQP_VHOST ?? 'mofi';
 }
 
+export function rabbitMgmtBaseUrl(): string {
+  const host = process.env.AMQP_HOST ?? '127.0.0.1';
+  const port = process.env.SYSTEM_TEST_RABBIT_MGMT_PORT ?? '15673';
+  return `http://${host}:${port}`;
+}
+
+export function rabbitManagementAuthHeader(): string {
+  const user = process.env.AMQP_USERNAME ?? 'mofi';
+  const pass = process.env.AMQP_PASSWORD ?? 'mofi';
+  return `Basic ${Buffer.from(`${user}:${pass}`).toString('base64')}`;
+}
+
 export async function waitForShimPath(
   calls: Array<{ path: string }>,
   pathFragment: string,
