@@ -18,20 +18,3 @@ export function rabbitManagementAuthHeader(): string {
   const pass = process.env.AMQP_PASSWORD ?? 'mofi';
   return `Basic ${Buffer.from(`${user}:${pass}`).toString('base64')}`;
 }
-
-export async function waitForShimPath(
-  calls: Array<{ path: string }>,
-  pathFragment: string,
-  timeoutMs = 30_000,
-): Promise<void> {
-  const deadline = Date.now() + timeoutMs;
-  while (Date.now() < deadline) {
-    if (calls.some((c) => c.path.includes(pathFragment))) {
-      return;
-    }
-    await new Promise((r) => setTimeout(r, 250));
-  }
-  throw new Error(
-    `Timed out waiting for notification HTTP call containing "${pathFragment}"`,
-  );
-}

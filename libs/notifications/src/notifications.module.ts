@@ -8,7 +8,7 @@ import { LambdaInvokeQueueController } from './lambda-invoke-queue.controller';
 
 @Global()
 @Module({
-  imports: [HttpModule, MofiMessagingModule],
+  imports: [HttpModule.register({ timeout: 60_000 }), MofiMessagingModule],
   providers: [PlatformNotificationService, PlatformLambdaInvokeService],
   controllers: [NotificationQueueController, LambdaInvokeQueueController],
   exports: [PlatformNotificationService, PlatformLambdaInvokeService],

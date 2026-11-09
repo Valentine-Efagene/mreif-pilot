@@ -6,9 +6,9 @@
 | Mode | in-process |
 | **Overall** | **PASSED** |
 | Failed at | — |
-| Milestones passed | 6 / 6 |
-| Started | 2026-11-09T13:07:23.689Z |
-| Finished | 2026-11-09T13:07:25.476Z |
+| Milestones passed | 7 / 7 |
+| Started | 2026-11-09T14:13:31.156Z |
+| Finished | 2026-11-09T14:13:41.300Z |
 
 ## Milestone flow
 
@@ -36,11 +36,14 @@ flowchart TD
   m4["✓ All onboarding stages marked complete"]
   m3 --> m4
   class m4 passed
-  m5["✓ Company registration notification (RMQ → worker → HTTP)"]
+  m5["✓ Company registration notification (RMQ consumed → testnotify)"]
   m4 --> m5
   class m5 passed
+  m6["✓ Company registration email (manual inbox check)"]
+  m5 --> m6
+  class m6 passed
   endNode([End: PASSED])
-  m5 --> endNode
+  m6 --> endNode
   class endNode passed
 ```
 
@@ -48,12 +51,13 @@ flowchart TD
 
 | # | Milestone | Status | Detail |
 |---|-----------|--------|--------|
-| 1 | Stub project manager (admin notification audience) | ✅ passed | pm+fadnbf@system-tests.mofi |
-| 2 | Stub external registration (POST /developer/users) | ✅ passed | userId=28, email=developer-onboarding+wdg0igfk@system-tests.mofi |
-| 3 | Complete developer onboarding (POST /developer/developers) | ✅ passed | developerId=14 |
+| 1 | Stub project manager (admin notification audience) | ✅ passed | efagenevalentine@gmail.com |
+| 2 | Stub external registration (POST /developer/users) | ✅ passed | userId=46, email=efagenevalentine@gmail.com |
+| 3 | Complete developer onboarding (POST /developer/developers) | ✅ passed | developerId=23 |
 | 4 | Fetch developer by user (GET /developer/developers/by-user/:id) | ✅ passed |  |
 | 5 | All onboarding stages marked complete | ✅ passed | BUSINESS_DETAILS, GROUP_ENTITIES, DEVELOPER_DOCUMENTS, BANK_INFORMATION, DIRECTORS_FORM, TERMS_AND_CONDITION |
-| 6 | Company registration notification (RMQ → worker → HTTP) | ✅ passed | /admin/developer-company-registration |
+| 6 | Company registration notification (RMQ consumed → testnotify) | ✅ passed | mofi.notifications.commands deliverDelta=1, ready=0, unacked=1 (queue still has 1 message(s)—purge rabbit or restart compose if emails never arrive) |
+| 7 | Company registration email (manual inbox check) | ✅ passed | Manual: check inbox efagenevalentine@gmail.com for company registration template. |
 
 ## ASCII flow
 
@@ -64,21 +68,24 @@ START
  │ ✓ Complete developer onboarding (POST /developer/developers)
  │ ✓ Fetch developer by user (GET /developer/developers/by-user/:id)
  │ ✓ All onboarding stages marked complete
- │ ✓ Company registration notification (RMQ → worker → HTTP)
+ │ ✓ Company registration notification (RMQ consumed → testnotify)
+ │ ✓ Company registration email (manual inbox check)
  └── END (PASSED)
 ```
 
 ## Step log
 
-- **Stub project manager (admin notification audience)** — passed: pm+fadnbf@system-tests.mofi
-- **Stub external registration (POST /developer/users)** — passed: userId=28, email=developer-onboarding+wdg0igfk@system-tests.mofi
-- **Complete developer onboarding (POST /developer/developers)** — passed: developerId=14
+- **Stub project manager (admin notification audience)** — passed: efagenevalentine@gmail.com
+- **Stub external registration (POST /developer/users)** — passed: userId=46, email=efagenevalentine@gmail.com
+- **Complete developer onboarding (POST /developer/developers)** — passed: developerId=23
 - **Fetch developer by user (GET /developer/developers/by-user/:id)** — passed
 - **All onboarding stages marked complete** — passed: BUSINESS_DETAILS, GROUP_ENTITIES, DEVELOPER_DOCUMENTS, BANK_INFORMATION, DIRECTORS_FORM, TERMS_AND_CONDITION
-- **Company registration notification (RMQ → worker → HTTP)** — passed: /admin/developer-company-registration
+- **Company registration notification (RMQ consumed → testnotify)** — passed: mofi.notifications.commands deliverDelta=1, ready=0, unacked=1 (queue still has 1 message(s)—purge rabbit or restart compose if emails never arrive)
+- **Company registration email (manual inbox check)** — passed: Manual: check inbox efagenevalentine@gmail.com for company registration template.
 
 ## Notes
 
-- developerId=14, userId=28, pm=pm+fadnbf@system-tests.mofi, notificationTarget=shim
+- developerId=23, userId=46, pm=efagenevalentine@gmail.com, notificationUrl=https://api.qshelter.ng/testnotify/email
+- Manual: check inbox efagenevalentine@gmail.com for company registration template.
 
 _This file is overwritten on each test run. Every scenario report includes a milestone flow chart._

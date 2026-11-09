@@ -3,6 +3,7 @@ import {
   bootInProcessDeveloperApp,
   createHttpClient,
   createInProcessClient,
+  resetProjectManagersForSystemTest,
   runDeveloperOnboardingFlow,
 } from '../support/developer-onboarding.harness';
 import {
@@ -42,16 +43,15 @@ describeFn(scenarioName, () => {
       if (mode === 'in-process') {
         const booted = await bootInProcessDeveloperApp();
         cleanup = booted.cleanup;
+        await resetProjectManagersForSystemTest(booted.app);
         const client = createInProcessClient(booted.app);
         const flow = await runDeveloperOnboardingFlow(client, {
-          shim: booted.shim,
-          notificationTarget: booted.notificationTarget,
           queueBaseline: booted.queueBaseline,
           expectedNotificationMessages: 1,
         });
         report.steps = flow.steps;
         report.notes?.push(
-          `developerId=${flow.developerId}, userId=${flow.userId}, pm=${flow.projectManagerEmail}, notificationTarget=${booted.notificationTarget}`,
+          `developerId=${flow.developerId}, userId=${flow.userId}, pm=${flow.projectManagerEmail}, notificationUrl=${process.env.notification_url}`,
         );
         if (flow.manualInboxNote) {
           report.notes?.push(flow.manualInboxNote);

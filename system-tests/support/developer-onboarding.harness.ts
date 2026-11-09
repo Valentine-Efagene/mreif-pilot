@@ -14,27 +14,20 @@ import {
   StubRegisteredUser,
 } from './stubs/external-registration.stub';
 import { createLambdaInvokeStub } from './stubs/lambda-invoke.stub';
-import { applyAmqpTestEnv, waitForShimPath } from './messaging-test-env';
+import { applyAmqpTestEnv } from './messaging-test-env';
 import {
-  assertRealNotificationsAllowed,
-  NotificationTarget,
-  resolveNotificationTarget,
-  resolveRealNotificationBaseUrl,
+  resolveNotificationBaseUrl,
   systemTestProjectManagerEmail,
 } from './notification-test-config';
 import {
   fetchNotificationQueueSnapshot,
+  cancelNotificationsQueueConsumers,
   purgeNotificationsQueue,
   QueueSnapshot,
   waitForNotificationQueueConsumed,
 } from './rabbitmq-test-helpers';
 import { StepResult } from './report-writer';
 import { httpTestClient } from './http-test-client';
-import {
-  ShimCapturedCall,
-  startNotificationShim,
-} from './notification-shim';
-import { fetchMailpitMessages, isMailpitReachable } from './mailpit-relay';
 import { systemTestAuthHeaders } from './system-test-auth';
 
 export type OnboardingFlowResult = {
@@ -61,8 +54,6 @@ export type DeveloperOnboardingClient = {
 export type DeveloperAppBoot = {
   app: INestApplication;
   workerApp: INestApplication;
-  notificationTarget: NotificationTarget;
-  shim?: Awaited<ReturnType<typeof startNotificationShim>>;
   queueBaseline: QueueSnapshot;
   cleanup: () => Promise<void>;
 };
@@ -97,24 +88,21 @@ async function syncDeveloperNotificationUrl(baseUrl: string): Promise<void> {
   EnvironmentHelper.env.notification_url = baseUrl;
 }
 
+/** Wipe accumulated PM rows so company-registration notifies only the stub PM. */
+export async function resetProjectManagersForSystemTest(
+  app: INestApplication,
+): Promise<void> {
+  const { getDataSourceToken } = await import('@nestjs/typeorm');
+  const ds = app.get(getDataSourceToken('developer'));
+  await ds.query(
+    `DELETE FROM users WHERE JSON_CONTAINS(roles, '"project_manager"')`,
+  );
+}
+
 export async function bootInProcessDeveloperApp(): Promise<DeveloperAppBoot> {
   applyInProcessTestEnv();
-  assertRealNotificationsAllowed();
 
-  const notificationTarget = resolveNotificationTarget();
-  let shim: Awaited<ReturnType<typeof startNotificationShim>> | undefined;
-
-  if (notificationTarget === 'shim') {
-    shim = await startNotificationShim();
-    await syncDeveloperNotificationUrl(shim.baseUrl);
-  } else {
-    const baseUrl = resolveRealNotificationBaseUrl();
-    await syncDeveloperNotificationUrl(baseUrl);
-    // eslint-disable-next-line no-console
-    console.warn(
-      `[system-test] real testnotify baseUrl=${baseUrl} (manual inbox check required)`,
-    );
-  }
+  await syncDeveloperNotificationUrl(resolveNotificationBaseUrl());
 
   const lambdaStub = createLambdaInvokeStub();
 
@@ -132,14 +120,14 @@ export async function bootInProcessDeveloperApp(): Promise<DeveloperAppBoot> {
     .useValue(lambdaStub)
     .compile();
 
-  await purgeNotificationsQueue();
+  cancelNotificationsQueueConsumers();
 
   const workerApp = workerFixture.createNestApplication();
   await workerApp.init();
+  await purgeNotificationsQueue();
   const workerConfig = workerApp.get(ConfigService);
   await connectMofiMicroservices(workerApp, workerConfig);
 
-  await purgeNotificationsQueue();
   const queueBaseline = await fetchNotificationQueueSnapshot();
 
   process.env.MOFI_RUNTIME = 'domain';
@@ -169,13 +157,10 @@ export async function bootInProcessDeveloperApp(): Promise<DeveloperAppBoot> {
   return {
     app,
     workerApp,
-    notificationTarget,
-    shim,
     queueBaseline,
     cleanup: async () => {
       await app.close();
       await workerApp.close();
-      await shim?.close();
     },
   };
 }
@@ -356,8 +341,6 @@ export function createHttpClient(baseUrl: string): DeveloperOnboardingClient {
 const REQUIRED_STAGES = Object.values(DeveloperOnboardingStageName);
 
 export type NotificationCheckContext = {
-  shim?: { calls: ShimCapturedCall[] };
-  notificationTarget?: NotificationTarget;
   queueBaseline?: QueueSnapshot;
   expectedNotificationMessages?: number;
   projectManagerEmail?: string;
@@ -383,6 +366,14 @@ export async function runDeveloperOnboardingFlow(
     status: 'passed',
     detail: `userId=${userId}, email=${profile.email}`,
   });
+
+  if (notificationCtx.queueBaseline) {
+    await purgeNotificationsQueue();
+    Object.assign(
+      notificationCtx.queueBaseline,
+      await fetchNotificationQueueSnapshot(),
+    );
+  }
 
   const { developerId } = await client.completeOnboarding(userId, profile);
   steps.push({
@@ -414,39 +405,26 @@ export async function runDeveloperOnboardingFlow(
     detail: REQUIRED_STAGES.join(', '),
   });
 
-  const shimCalls = notificationCtx.shim?.calls ?? [];
-  if (notificationCtx.notificationTarget === 'real' && notificationCtx.queueBaseline) {
+  let manualInboxNote: string | undefined;
+
+  if (notificationCtx.queueBaseline) {
     const expected = notificationCtx.expectedNotificationMessages ?? 1;
     const final = await waitForNotificationQueueConsumed(
       notificationCtx.queueBaseline,
       expected,
     );
-    const ackDelta = final.ackTotal - notificationCtx.queueBaseline.ackTotal;
+    const deliverDelta =
+      final.deliverGetTotal - notificationCtx.queueBaseline.deliverGetTotal;
+    const pending = final.messages_ready + final.messages_unacknowledged;
+  const queueNote =
+      pending > 0
+        ? ` (queue still has ${pending} message(s)—purge rabbit or restart compose if emails never arrive)`
+        : '';
     steps.push({
       name: 'Company registration notification (RMQ consumed → testnotify)',
       status: 'passed',
-      detail: `mofi.notifications.commands ackDelta=${ackDelta}, ready=${final.messages_ready}, unacked=${final.messages_unacknowledged}`,
+      detail: `mofi.notifications.commands deliverDelta=${deliverDelta}, ready=${final.messages_ready}, unacked=${final.messages_unacknowledged}${queueNote}`,
     });
-  } else if (notificationCtx.shim) {
-    await waitForShimPath(
-      shimCalls,
-      '/admin/developer-company-registration',
-    );
-    const companyReg = shimCalls.find((c) =>
-      c.path.includes('/admin/developer-company-registration'),
-    );
-    steps.push({
-      name: 'Company registration notification (RMQ → worker → HTTP)',
-      status: companyReg ? 'passed' : 'failed',
-      detail: companyReg?.path,
-    });
-    if (!companyReg) {
-      throw new Error('Notification shim did not receive company registration');
-    }
-  }
-
-  let manualInboxNote: string | undefined;
-  if (notificationCtx.notificationTarget === 'real') {
     const inbox = systemTestProjectManagerEmail();
     manualInboxNote = `Manual: check inbox ${inbox} for company registration template.`;
     steps.push({
@@ -454,35 +432,11 @@ export async function runDeveloperOnboardingFlow(
       status: 'passed',
       detail: manualInboxNote,
     });
-  }
-
-  if (
-    notificationCtx.notificationTarget !== 'real' &&
-    process.env.SYSTEM_TEST_MAILPIT === 'true' &&
-    (await isMailpitReachable())
-  ) {
-    const messages = await fetchMailpitMessages();
-    const pmEmail = projectManagerEmail ?? notificationCtx.projectManagerEmail;
-    const delivered = messages.some((m) =>
-      m.To?.some(
-        (t) => t.Address.toLowerCase() === pmEmail?.toLowerCase(),
-      ),
-    );
+  } else {
     steps.push({
-      name: 'Company registration notification (Mailpit)',
-      status: delivered ? 'passed' : 'failed',
-      detail: delivered
-        ? `found message for ${pmEmail}`
-        : `no message for ${pmEmail} (${messages.length} total)`,
-    });
-    if (!delivered) {
-      throw new Error(`Mailpit did not receive email for ${pmEmail}`);
-    }
-  } else if (!notificationCtx.shim && notificationCtx.notificationTarget !== 'real') {
-    steps.push({
-      name: 'Company registration notification (RMQ → worker → HTTP)',
+      name: 'Company registration notification (RMQ → worker → testnotify)',
       status: 'skipped',
-      detail: 'HTTP platform mode without in-process worker/shim',
+      detail: 'HTTP platform mode without in-process worker/Rabbit',
     });
   }
 

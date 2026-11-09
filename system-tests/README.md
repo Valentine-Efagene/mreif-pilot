@@ -25,20 +25,21 @@ Rabbit management UI (local test compose): http://localhost:15673 (`mofi` / `mof
 
 ## Notifications (in-process)
 
-| Mode | Env | Behaviour |
-|------|-----|-----------|
-| **Shim (default)** | — | Worker POSTs to local HTTP shim; assert `/admin/developer-company-registration` |
-| **Real testnotify** | `SYSTEM_TEST_NOTIFICATION_TARGET=real` + `SYSTEM_TEST_ALLOW_REAL_NOTIFICATIONS=true` | Worker POSTs to `https://api.qshelter.ng/testnotify/email` (override with `NOTIFICATION_URL`); assert **Rabbit queue consumed/acked**; **manual** inbox check (default PM/developer email `efagenevalentine@gmail.com`) |
-| **Mailpit (shim only)** | `SYSTEM_TEST_MAILPIT=true` | Optional relay from shim into Mailpit API; not used with real testnotify |
+The worker always POSTs to the Qshelter **testnotify** endpoint (default `https://api.qshelter.ng/testnotify/email`; override with `NOTIFICATION_URL`).
 
-Real testnotify example:
+| Check | Automated | Manual |
+|-------|-----------|--------|
+| RMQ consumption on `mofi.notifications.commands` | ✓ | — |
+| Email in inbox | — | ✓ (default PM/developer: `efagenevalentine@gmail.com`) |
+
+Optional overrides:
+
+- `SYSTEM_TEST_DEVELOPER_EMAIL` / `SYSTEM_TEST_PM_EMAIL` — recipients used in stub user registration
+- `SYSTEM_TEST_NOTIFICATION_AUTH` — Bearer token if testnotify requires auth
 
 ```bash
 npm run test:system:deps
 export SYSTEM_TESTS_ENABLED=true
-export SYSTEM_TEST_NOTIFICATION_TARGET=real
-export SYSTEM_TEST_ALLOW_REAL_NOTIFICATIONS=true
-# optional: export SYSTEM_TEST_NOTIFICATION_AUTH='Bearer …'
 npm run test:system
 ```
 

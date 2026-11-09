@@ -28,15 +28,23 @@ export class NotificationQueueController {
       `Delivering notification ${envelope.correlationId} → ${url}`,
     );
 
-    await firstValueFrom(
+    const response = await firstValueFrom(
       this.httpService.post(url, body, { headers }).pipe(
         catchError((error: AxiosError) => {
+          const status = error.response?.status;
+          const bodyPreview =
+            typeof error.response?.data === 'string'
+              ? error.response.data.slice(0, 200)
+              : JSON.stringify(error.response?.data ?? '').slice(0, 200);
           this.logger.error(
-            `Notification delivery failed ${envelope.correlationId}: ${error.message}`,
+            `Notification delivery failed ${envelope.correlationId}: ${error.message} status=${status} body=${bodyPreview}`,
           );
           throw error;
         }),
       ),
+    );
+    this.logger.log(
+      `Notification delivered ${envelope.correlationId} status=${response.status}`,
     );
   }
 }

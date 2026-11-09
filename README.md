@@ -42,7 +42,7 @@ Use repo-root `.env` for host single-process dev; the k8s stack injects env via 
 
 Notifications and verifier lambdas always publish to RabbitMQ; the worker process delivers HTTP notifications and invokes lambdas.
 
-**System e2e:** [`system-tests/`](system-tests/) — run `npm run test:system:deps` (MySQL + RabbitMQ + Mailpit) then `SYSTEM_TESTS_ENABLED=true npm run test:system` (in-process mode boots developer API + worker + notification HTTP shim).
+**System e2e:** [`system-tests/`](system-tests/) — run `npm run test:system:deps` (MySQL + RabbitMQ) then `SYSTEM_TESTS_ENABLED=true npm run test:system` (in-process developer API + worker → Qshelter testnotify).
 
 ## Build & run (production container)
 
