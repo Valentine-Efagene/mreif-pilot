@@ -16,6 +16,8 @@ Consumers live in the owning domain (`domains/<name>/src/messaging/`) and run in
 
 Publishers use `AsyncJobsPublisher` unchanged; routing keys remain the `eventName`.
 
+RabbitMQ durability, delivery limits, and dead-letter queues are documented in [rabbitmq.md](./rabbitmq.md).
+
 ## `developer.assets.purge`
 
 Purges a developer record and related storage after an async delete is accepted on the HTTP API.

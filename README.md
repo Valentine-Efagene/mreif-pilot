@@ -40,7 +40,7 @@ Use repo-root `.env` for host single-process dev; the k8s stack injects env via 
 
 **Auth:** Default `AUTH_ENFORCEMENT=local` enables a dev-only JWT guard that mirrors authorizer **public routes** (`libs/auth/src/authorizer-public-routes.ts`). Production ECS uses `AUTH_ENFORCEMENT=gateway` (CDK); JWT is enforced by the **API Gateway authorizer**. See [infra/aws/GATEWAY-AUTH.md](infra/aws/GATEWAY-AUTH.md).
 
-Notifications and verifier lambdas always publish to RabbitMQ; the worker process delivers HTTP notifications and invokes lambdas.
+Notifications and verifier lambdas always publish to RabbitMQ; the worker process delivers HTTP notifications and invokes lambdas. Queue policy (delivery limit, DLQ): [docs/rabbitmq.md](docs/rabbitmq.md).
 
 **System e2e:** [`system-tests/`](system-tests/) — run `npm run test:system:deps` (MySQL + RabbitMQ) then `SYSTEM_TESTS_ENABLED=true npm run test:system` (in-process developer API + worker → Qshelter testnotify).
 

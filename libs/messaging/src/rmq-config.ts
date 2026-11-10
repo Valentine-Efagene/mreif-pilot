@@ -4,11 +4,19 @@ import {
   domainCommandsBindingKey,
   domainCommandsQueueName,
 } from './domain-commands';
+import {
+  buildWorkQueueDeclareOptions,
+  isExchangeBackedClient,
+  resolveMofiRmqDeliveryLimit,
+} from './rmq-queue-policy';
 
 export type MofiRmqOptions = {
   urls: string[];
   queue: string;
-  queueOptions?: { durable?: boolean };
+  queueOptions?: {
+    durable?: boolean;
+    arguments?: Record<string, unknown>;
+  };
   noAck?: boolean;
   prefetchCount?: number;
   isGlobalPrefetchCount?: boolean;
@@ -58,10 +66,11 @@ export function buildRmqMicroserviceOptions(
     >
   > = {},
 ): MofiRmqOptions {
+  const deliveryLimit = resolveMofiRmqDeliveryLimit(config);
   return {
     urls: getAmqpUrls(config),
     queue,
-    queueOptions: { durable: true },
+    queueOptions: buildWorkQueueDeclareOptions(queue, deliveryLimit),
     noAck: false,
     prefetchCount: 1,
     isGlobalPrefetchCount: true,
@@ -80,10 +89,14 @@ export function buildRmqClientOptions(
     >
   > = {},
 ): MofiRmqOptions {
+  const deliveryLimit = resolveMofiRmqDeliveryLimit(config);
+  const queueOptions = isExchangeBackedClient(extra)
+    ? { durable: true }
+    : buildWorkQueueDeclareOptions(queue, deliveryLimit);
   return {
     urls: getAmqpUrls(config),
     queue,
-    queueOptions: { durable: true },
+    queueOptions,
     noAck: true,
     ...extra,
   };

@@ -5,6 +5,9 @@ export function applyAmqpTestEnv(): void {
   process.env.AMQP_USERNAME = process.env.AMQP_USERNAME ?? 'mofi';
   process.env.AMQP_PASSWORD = process.env.AMQP_PASSWORD ?? 'mofi';
   process.env.AMQP_VHOST = process.env.AMQP_VHOST ?? 'mofi';
+  // Test Rabbit image may not support x-delivery-limit on classic queues; DLQ still applies.
+  process.env.MOFI_RMQ_DELIVERY_LIMIT =
+    process.env.MOFI_RMQ_DELIVERY_LIMIT ?? '0';
 }
 
 export function rabbitMgmtBaseUrl(): string {

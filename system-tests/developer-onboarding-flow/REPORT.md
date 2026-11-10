@@ -7,8 +7,8 @@
 | **Overall** | **PASSED** |
 | Failed at | — |
 | Milestones passed | 7 / 7 |
-| Started | 2026-11-09T14:13:31.156Z |
-| Finished | 2026-11-09T14:13:41.300Z |
+| Started | 2026-11-09T21:50:01.411Z |
+| Finished | 2026-11-09T21:50:32.319Z |
 
 ## Milestone flow
 
@@ -52,11 +52,11 @@ flowchart TD
 | # | Milestone | Status | Detail |
 |---|-----------|--------|--------|
 | 1 | Stub project manager (admin notification audience) | ✅ passed | efagenevalentine@gmail.com |
-| 2 | Stub external registration (POST /developer/users) | ✅ passed | userId=46, email=efagenevalentine@gmail.com |
-| 3 | Complete developer onboarding (POST /developer/developers) | ✅ passed | developerId=23 |
+| 2 | Stub external registration (POST /developer/users) | ✅ passed | userId=48, email=efagenevalentine@gmail.com |
+| 3 | Complete developer onboarding (POST /developer/developers) | ✅ passed | developerId=24 |
 | 4 | Fetch developer by user (GET /developer/developers/by-user/:id) | ✅ passed |  |
 | 5 | All onboarding stages marked complete | ✅ passed | BUSINESS_DETAILS, GROUP_ENTITIES, DEVELOPER_DOCUMENTS, BANK_INFORMATION, DIRECTORS_FORM, TERMS_AND_CONDITION |
-| 6 | Company registration notification (RMQ consumed → testnotify) | ✅ passed | mofi.notifications.commands deliverDelta=1, ready=0, unacked=1 (queue still has 1 message(s)—purge rabbit or restart compose if emails never arrive) |
+| 6 | Company registration notification (RMQ consumed → testnotify) | ✅ passed | mofi.notifications.commands deliverDelta=1, ready=0, unacked=0 |
 | 7 | Company registration email (manual inbox check) | ✅ passed | Manual: check inbox efagenevalentine@gmail.com for company registration template. |
 
 ## ASCII flow
@@ -76,16 +76,16 @@ START
 ## Step log
 
 - **Stub project manager (admin notification audience)** — passed: efagenevalentine@gmail.com
-- **Stub external registration (POST /developer/users)** — passed: userId=46, email=efagenevalentine@gmail.com
-- **Complete developer onboarding (POST /developer/developers)** — passed: developerId=23
+- **Stub external registration (POST /developer/users)** — passed: userId=48, email=efagenevalentine@gmail.com
+- **Complete developer onboarding (POST /developer/developers)** — passed: developerId=24
 - **Fetch developer by user (GET /developer/developers/by-user/:id)** — passed
 - **All onboarding stages marked complete** — passed: BUSINESS_DETAILS, GROUP_ENTITIES, DEVELOPER_DOCUMENTS, BANK_INFORMATION, DIRECTORS_FORM, TERMS_AND_CONDITION
-- **Company registration notification (RMQ consumed → testnotify)** — passed: mofi.notifications.commands deliverDelta=1, ready=0, unacked=1 (queue still has 1 message(s)—purge rabbit or restart compose if emails never arrive)
+- **Company registration notification (RMQ consumed → testnotify)** — passed: mofi.notifications.commands deliverDelta=1, ready=0, unacked=0
 - **Company registration email (manual inbox check)** — passed: Manual: check inbox efagenevalentine@gmail.com for company registration template.
 
 ## Notes
 
-- developerId=23, userId=46, pm=efagenevalentine@gmail.com, notificationUrl=https://api.qshelter.ng/testnotify/email
+- developerId=24, userId=48, pm=efagenevalentine@gmail.com, notificationUrl=https://api.qshelter.ng/testnotify/email
 - Manual: check inbox efagenevalentine@gmail.com for company registration template.
 
 _This file is overwritten on each test run. Every scenario report includes a milestone flow chart._

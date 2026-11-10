@@ -10,6 +10,7 @@ import {
   buildDomainCommandsConsumerOptions,
   buildRmqMicroserviceOptions,
 } from '../../libs/messaging/src/rmq-config';
+import { ensureMofiRmqDeadLetterTopology } from '../../libs/messaging/src/rmq-topology';
 
 export type WorkerQueues = 'notifications' | 'verifier' | 'all';
 
@@ -33,6 +34,16 @@ export async function connectMofiMicroservices(
 
   if (runtime === 'edge') {
     return;
+  }
+
+  try {
+    await ensureMofiRmqDeadLetterTopology(config);
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    console.error(
+      `RMQ DLQ topology failed (check broker version >= 3.13 and queue migrations): ${msg}`,
+    );
+    throw err;
   }
 
   if (runtime === 'domain') {

@@ -1,4 +1,4 @@
-import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Developer } from '../developer/developer.entity';
@@ -44,8 +44,10 @@ export class DeveloperAssetsPurgeHandler {
       where: { id: developerId },
     });
     if (!developer) {
-      await this.asyncJobs.fail(jobId, `Developer ${developerId} not found`);
-      throw new NotFoundException(`Developer ${developerId} not found`);
+      const message = `Developer ${developerId} not found`;
+      await this.asyncJobs.fail(jobId, message);
+      this.logger.warn(`${message} (jobId=${jobId}); acking RMQ message`);
+      return;
     }
 
     try {

@@ -1,4 +1,6 @@
 import { execSync } from 'child_process';
+import { listMofiWorkQueues } from '../../libs/messaging/src/rmq-topology';
+import { deadLetterQueueName } from '../../libs/messaging/src/rmq-queue-policy';
 import { MOFI_NOTIFICATIONS_QUEUE } from '../../libs/messaging/src/message-envelope';
 import { rabbitManagementAuthHeader, rabbitMgmtBaseUrl } from './messaging-test-env';
 
@@ -22,6 +24,26 @@ function deliverGetTotal(stats?: RabbitQueueResponse['message_stats']): number {
 
 export function queuePending(snapshot: QueueSnapshot): number {
   return snapshot.messages_ready + snapshot.messages_unacknowledged;
+}
+
+/**
+ * Deletes work + DLQ queues so Nest can re-declare them with production policy
+ * (406 PRECONDITION_FAILED if queue args changed).
+ */
+export function recreateMofiWorkQueuesForTests(): void {
+  const vhost = process.env.AMQP_VHOST ?? 'mofi';
+  for (const queue of listMofiWorkQueues()) {
+    for (const name of [queue, deadLetterQueueName(queue)]) {
+      try {
+        execSync(
+          `docker exec mofi-test-rabbitmq rabbitmqctl delete_queue -p ${vhost} ${name}`,
+          { stdio: 'ignore' },
+        );
+      } catch {
+        // queue may not exist
+      }
+    }
+  }
 }
 
 /** Drop stale consumers from prior test runs so unacked messages do not block the queue. */
@@ -75,7 +97,7 @@ export async function purgeNotificationsQueue(): Promise<void> {
       headers: { Authorization: rabbitManagementAuthHeader() },
     },
   );
-  if (!res.ok && res.status !== 204) {
+  if (!res.ok && res.status !== 204 && res.status !== 404) {
     const text = await res.text();
     throw new Error(
       `Failed to purge ${MOFI_NOTIFICATIONS_QUEUE} (${res.status}): ${text.slice(0, 300)}`,

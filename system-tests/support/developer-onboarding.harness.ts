@@ -23,6 +23,7 @@ import {
   fetchNotificationQueueSnapshot,
   cancelNotificationsQueueConsumers,
   purgeNotificationsQueue,
+  recreateMofiWorkQueuesForTests,
   QueueSnapshot,
   waitForNotificationQueueConsumed,
 } from './rabbitmq-test-helpers';
@@ -121,13 +122,14 @@ export async function bootInProcessDeveloperApp(): Promise<DeveloperAppBoot> {
     .compile();
 
   cancelNotificationsQueueConsumers();
+  recreateMofiWorkQueuesForTests();
 
   const workerApp = workerFixture.createNestApplication();
   await workerApp.init();
-  await purgeNotificationsQueue();
   const workerConfig = workerApp.get(ConfigService);
   await connectMofiMicroservices(workerApp, workerConfig);
 
+  await purgeNotificationsQueue();
   const queueBaseline = await fetchNotificationQueueSnapshot();
 
   process.env.MOFI_RUNTIME = 'domain';
