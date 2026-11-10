@@ -3,8 +3,6 @@ import { NestFactory } from '@nestjs/core';
 import { ConfigService } from '@nestjs/config';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { normalizeMofiEnv } from '../../libs/database/src/normalize-env';
-import { connectMofiMicroservices } from './connect-microservices';
-
 export type BootstrapHttpOptions = {
   globalPrefix?: string;
   enableSwagger?: boolean;
@@ -62,10 +60,7 @@ export async function bootstrapHttpApp(
     }),
   );
 
-  const config = app.get(ConfigService);
-  await connectMofiMicroservices(app, config);
-
-  const port = config.get<number>('PORT') ?? 8080;
+  const port = app.get(ConfigService).get<number>('PORT') ?? 8080;
   await app.listen(port);
   return app;
 }

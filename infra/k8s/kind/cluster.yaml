@@ -1,5 +1,8 @@
 # kind cluster for MOFI local dev + test (multicontainer platform Pod).
-# NodePort values must match helm/mofi-local/values-*.yaml.
+# NodePort values (containerPort here) must match helm/mofi-local/values-*.yaml.
+#
+# Host ports use the 18xxx/19xxx/25xxx/21xxx ranges so a co-located `qshelter`
+# kind cluster can keep 8080, 9000, 6380, etc.
 kind: Cluster
 apiVersion: kind.x-k8s.io/v1alpha4
 name: mofi
@@ -8,53 +11,39 @@ nodes:
     extraPortMappings:
       # mofi-dev — platform edge (API)
       - containerPort: 30080
-        hostPort: 8080
+        hostPort: 18080
         protocol: TCP
       # mofi-dev — MySQL
       - containerPort: 30307
-        hostPort: 3307
+        hostPort: 13307
         protocol: TCP
       # mofi-dev — Redis
       - containerPort: 30637
-        hostPort: 6379
+        hostPort: 16379
         protocol: TCP
       # mofi-dev — MinIO API / console
       - containerPort: 30900
-        hostPort: 9000
+        hostPort: 19000
         protocol: TCP
       - containerPort: 30901
-        hostPort: 9001
-        protocol: TCP
-      # mofi-dev — RabbitMQ AMQP / management
-      - containerPort: 30567
-        hostPort: 5672
-        protocol: TCP
-      - containerPort: 31567
-        hostPort: 15672
+        hostPort: 19001
         protocol: TCP
       # mofi-test — platform edge
       - containerPort: 30081
-        hostPort: 8082
+        hostPort: 18082
         protocol: TCP
       # mofi-test — MySQL
       - containerPort: 30308
-        hostPort: 3308
+        hostPort: 13308
         protocol: TCP
       # mofi-test — Redis
       - containerPort: 30638
-        hostPort: 6380
+        hostPort: 16380
         protocol: TCP
       # mofi-test — MinIO
       - containerPort: 30902
-        hostPort: 9100
+        hostPort: 19100
         protocol: TCP
       - containerPort: 30903
-        hostPort: 9101
-        protocol: TCP
-      # mofi-test — RabbitMQ
-      - containerPort: 30568
-        hostPort: 5673
-        protocol: TCP
-      - containerPort: 31568
-        hostPort: 15673
+        hostPort: 19101
         protocol: TCP

@@ -1,0 +1,3 @@
+# Copy to values-otel.local.yaml (gitignored) or export OTEL_EXPORTER_OTLP_HEADERS when running helm.
+observability:
+  otlpHeaders: "Authorization=Basic <grafana-cloud-token>"

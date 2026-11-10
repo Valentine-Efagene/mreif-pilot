@@ -6,10 +6,10 @@ PROFILE="${1:-dev}"
 
 case "$PROFILE" in
   dev)
-    URL="http://localhost:8080/health"
+    URL="http://localhost:18080/health"
     ;;
   test)
-    URL="http://localhost:8082/health"
+    URL="http://localhost:18082/health"
     ;;
   all)
     bash "$SCRIPT_DIR/wait-for-platform.sh" dev

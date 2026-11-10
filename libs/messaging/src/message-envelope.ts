@@ -5,7 +5,6 @@ export {
   MOFI_DOMAIN_COMMANDS_EXCHANGE,
   MOFI_DOMAIN_COMMANDS_QUEUE,
   domainCommandsQueueName,
-  domainCommandsBindingKey,
   DOMAIN_COMMAND_CONSUMER_ROLES,
   isDomainCommandConsumerRole,
 } from './domain-commands';

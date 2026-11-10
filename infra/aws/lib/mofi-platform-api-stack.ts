@@ -6,7 +6,7 @@ import * as elbv2 from 'aws-cdk-lib/aws-elasticloadbalancingv2';
 import * as logs from 'aws-cdk-lib/aws-logs';
 import * as iam from 'aws-cdk-lib/aws-iam';
 import * as secretsmanager from 'aws-cdk-lib/aws-secretsmanager';
-import * as amazonmq from 'aws-cdk-lib/aws-amazonmq';
+import * as elasticache from 'aws-cdk-lib/aws-elasticache';
 import * as rds from 'aws-cdk-lib/aws-rds';
 import * as s3 from 'aws-cdk-lib/aws-s3';
 import { Construct } from 'constructs';
@@ -72,9 +72,7 @@ export class MofiPlatformApiStack extends cdk.Stack {
       secretName: `mofi-platform-api/${stage}/app`,
       description: 'JWT and app credentials for MOFI platform API (DB from RDS secret)',
       generateSecretString: {
-        secretStringTemplate: JSON.stringify({
-          AMQP_USERNAME: 'mofi',
-        }),
+        secretStringTemplate: JSON.stringify({ app: 'mofi-platform-api' }),
         generateStringKey: 'JWT_SECRET',
         excludePunctuation: true,
       },
@@ -104,12 +102,13 @@ export class MofiPlatformApiStack extends cdk.Stack {
       backupRetention: cdk.Duration.days(stage === 'main' ? 7 : 1),
     });
 
-    const brokerSecret = new secretsmanager.Secret(this, 'BrokerSecret', {
-      secretName: `mofi-platform-api/${stage}/rabbitmq`,
-      description: 'Amazon MQ RabbitMQ credentials',
+    const valkeySecret = new secretsmanager.Secret(this, 'ValkeySecret', {
+      secretName: `mofi-platform-api/${stage}/valkey`,
+      description: 'ElastiCache Valkey AUTH token',
       generateSecretString: {
-        secretStringTemplate: JSON.stringify({ username: 'mofi' }),
+        secretStringTemplate: JSON.stringify({ engine: 'valkey' }),
         generateStringKey: 'password',
+        passwordLength: 32,
         excludePunctuation: true,
       },
     });
@@ -139,30 +138,37 @@ export class MofiPlatformApiStack extends cdk.Stack {
       autoDeleteObjects: stage !== 'main',
     });
 
-    const brokerSg = new ec2.SecurityGroup(this, 'BrokerSecurityGroup', {
+    const valkeySg = new ec2.SecurityGroup(this, 'ValkeySecurityGroup', {
       vpc,
-      description: 'Amazon MQ RabbitMQ broker',
+      description: 'ElastiCache Valkey',
       allowAllOutbound: true,
     });
-    brokerSg.addIngressRule(taskSg, ec2.Port.tcp(5671), 'AMQPS from ECS tasks');
-    brokerSg.addIngressRule(taskSg, ec2.Port.tcp(5672), 'AMQP from ECS tasks');
+    valkeySg.addIngressRule(taskSg, ec2.Port.tcp(6379), 'Valkey from ECS tasks');
 
-    const broker = new amazonmq.CfnBroker(this, 'RabbitBroker', {
-      brokerName: `mofi-rmq-${stage}`.slice(0, 50),
-      engineType: 'RabbitMQ',
-      engineVersion: '3.13',
-      // mq.t3.micro is deprecated and not available for new RabbitMQ brokers (AWS as of 2026).
-      hostInstanceType: stage === 'main' ? 'mq.m5.large' : 'mq.m7g.medium',
-      deploymentMode: 'SINGLE_INSTANCE',
-      publiclyAccessible: false,
-      subnetIds: [vpc.privateSubnets[0].subnetId],
-      securityGroups: [brokerSg.securityGroupId],
-      users: [
-        {
-          username: 'mofi',
-          password: brokerSecret.secretValueFromJson('password').unsafeUnwrap(),
-        },
-      ],
+    const valkeySubnetGroup = new elasticache.CfnSubnetGroup(
+      this,
+      'ValkeySubnetGroup',
+      {
+        description: `MOFI Valkey subnets (${stage})`,
+        subnetIds: vpc.selectSubnets({
+          subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS,
+        }).subnetIds,
+      },
+    );
+
+    const valkey = new elasticache.CfnReplicationGroup(this, 'Valkey', {
+      replicationGroupDescription: `mofi-valkey-${stage}`,
+      engine: 'valkey',
+      engineVersion: '8.0',
+      cacheNodeType: stage === 'main' ? 'cache.t4g.medium' : 'cache.t4g.small',
+      numCacheClusters: 1,
+      automaticFailoverEnabled: false,
+      multiAzEnabled: false,
+      cacheSubnetGroupName: valkeySubnetGroup.ref,
+      securityGroupIds: [valkeySg.securityGroupId],
+      transitEncryptionEnabled: true,
+      atRestEncryptionEnabled: true,
+      authToken: valkeySecret.secretValueFromJson('password').unsafeUnwrap(),
     });
 
     const taskRole = new iam.Role(this, 'TaskRole', {
@@ -170,7 +176,7 @@ export class MofiPlatformApiStack extends cdk.Stack {
     });
 
     appSecret.grantRead(taskRole);
-    brokerSecret.grantRead(taskRole);
+    valkeySecret.grantRead(taskRole);
     const dbSecret = database.secret;
     if (dbSecret) {
       dbSecret.grantRead(taskRole);
@@ -194,6 +200,10 @@ export class MofiPlatformApiStack extends cdk.Stack {
 
     const stackRegion = cdk.Stack.of(this).region;
 
+    const grafanaOtlpEndpoint = this.node.tryGetContext(
+      'grafanaOtlpEndpoint',
+    ) as string | undefined;
+
     const sharedEnvironment: Record<string, string> = {
       NODE_ENV: stage === 'main' ? 'production' : 'development',
       MOFI_STAGE: stage,
@@ -202,14 +212,19 @@ export class MofiPlatformApiStack extends cdk.Stack {
       // Never run schema sync from eight containers against one RDS task (race + memory spike).
       TYPEORM_SYNCHRONIZE: 'false',
       NODE_OPTIONS: '--max-old-space-size=1400',
-      AMQP_VHOST: '/',
-      AMQP_USERNAME: 'mofi',
-      AMQP_URL: cdk.Token.asString(cdk.Fn.select(0, broker.attrAmqpEndpoints)),
+      REDIS_HOST: valkey.attrPrimaryEndPointAddress,
+      REDIS_PORT: valkey.attrPrimaryEndPointPort,
+      REDIS_TLS: 'true',
       AWS_S3_BUCKET_NAME: uploadsBucket.bucketName,
       AWS_S3_REGION: stackRegion,
       CUSTOM_AWS_S3_BUCKET_NAME: uploadsBucket.bucketName,
       CUSTOM_AWS_REGION: stackRegion,
     };
+
+    if (grafanaOtlpEndpoint) {
+      sharedEnvironment.OTEL_EXPORTER_OTLP_ENDPOINT = grafanaOtlpEndpoint;
+      sharedEnvironment.OTEL_EXPORTER_OTLP_PROTOCOL = 'http/protobuf';
+    }
 
     if (!dbSecret) {
       throw new Error('RDS instance secret is required for ECS database configuration');
@@ -221,8 +236,15 @@ export class MofiPlatformApiStack extends cdk.Stack {
       DB_USERNAME: ecs.Secret.fromSecretsManager(dbSecret, 'username'),
       DB_PASSWORD: ecs.Secret.fromSecretsManager(dbSecret, 'password'),
       JWT_SECRET: ecs.Secret.fromSecretsManager(appSecret, 'JWT_SECRET'),
-      AMQP_PASSWORD: ecs.Secret.fromSecretsManager(brokerSecret, 'password'),
+      REDIS_PASSWORD: ecs.Secret.fromSecretsManager(valkeySecret, 'password'),
     };
+
+    if (grafanaOtlpEndpoint) {
+      sharedSecrets.OTEL_EXPORTER_OTLP_HEADERS = ecs.Secret.fromSecretsManager(
+        appSecret,
+        'OTEL_EXPORTER_OTLP_HEADERS',
+      );
+    }
 
     const addContainer = (
       name: string,
@@ -296,7 +318,7 @@ export class MofiPlatformApiStack extends cdk.Stack {
       healthCheckGracePeriod: cdk.Duration.seconds(420),
     });
 
-    service.node.addDependency(broker);
+    service.node.addDependency(valkey);
     service.node.addDependency(database);
 
     const alb = new elbv2.ApplicationLoadBalancer(this, 'Alb', {
@@ -327,7 +349,7 @@ export class MofiPlatformApiStack extends cdk.Stack {
     new cdk.CfnOutput(this, 'DbSecretArn', { value: dbSecret.secretArn });
     new cdk.CfnOutput(this, 'DbEndpoint', { value: database.dbInstanceEndpointAddress });
     new cdk.CfnOutput(this, 'UploadsBucketName', { value: uploadsBucket.bucketName });
-    new cdk.CfnOutput(this, 'BrokerSecretArn', { value: brokerSecret.secretArn });
+    new cdk.CfnOutput(this, 'ValkeySecretArn', { value: valkeySecret.secretArn });
     new cdk.CfnOutput(this, 'RuntimeLayout', { value: 'multicontainer' });
   }
 }

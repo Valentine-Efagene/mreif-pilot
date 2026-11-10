@@ -7,8 +7,8 @@
 | **Overall** | **PASSED** |
 | Failed at | — |
 | Milestones passed | 7 / 7 |
-| Started | 2026-11-09T21:50:01.411Z |
-| Finished | 2026-11-09T21:50:32.319Z |
+| Started | 2026-11-10T04:37:03.763Z |
+| Finished | 2026-11-10T04:37:36.934Z |
 
 ## Milestone flow
 
@@ -52,8 +52,8 @@ flowchart TD
 | # | Milestone | Status | Detail |
 |---|-----------|--------|--------|
 | 1 | Stub project manager (admin notification audience) | ✅ passed | efagenevalentine@gmail.com |
-| 2 | Stub external registration (POST /developer/users) | ✅ passed | userId=48, email=efagenevalentine@gmail.com |
-| 3 | Complete developer onboarding (POST /developer/developers) | ✅ passed | developerId=24 |
+| 2 | Stub external registration (POST /developer/users) | ✅ passed | userId=52, email=efagenevalentine@gmail.com |
+| 3 | Complete developer onboarding (POST /developer/developers) | ✅ passed | developerId=26 |
 | 4 | Fetch developer by user (GET /developer/developers/by-user/:id) | ✅ passed |  |
 | 5 | All onboarding stages marked complete | ✅ passed | BUSINESS_DETAILS, GROUP_ENTITIES, DEVELOPER_DOCUMENTS, BANK_INFORMATION, DIRECTORS_FORM, TERMS_AND_CONDITION |
 | 6 | Company registration notification (RMQ consumed → testnotify) | ✅ passed | mofi.notifications.commands deliverDelta=1, ready=0, unacked=0 |
@@ -76,8 +76,8 @@ START
 ## Step log
 
 - **Stub project manager (admin notification audience)** — passed: efagenevalentine@gmail.com
-- **Stub external registration (POST /developer/users)** — passed: userId=48, email=efagenevalentine@gmail.com
-- **Complete developer onboarding (POST /developer/developers)** — passed: developerId=24
+- **Stub external registration (POST /developer/users)** — passed: userId=52, email=efagenevalentine@gmail.com
+- **Complete developer onboarding (POST /developer/developers)** — passed: developerId=26
 - **Fetch developer by user (GET /developer/developers/by-user/:id)** — passed
 - **All onboarding stages marked complete** — passed: BUSINESS_DETAILS, GROUP_ENTITIES, DEVELOPER_DOCUMENTS, BANK_INFORMATION, DIRECTORS_FORM, TERMS_AND_CONDITION
 - **Company registration notification (RMQ consumed → testnotify)** — passed: mofi.notifications.commands deliverDelta=1, ready=0, unacked=0
@@ -85,7 +85,7 @@ START
 
 ## Notes
 
-- developerId=24, userId=48, pm=efagenevalentine@gmail.com, notificationUrl=https://api.qshelter.ng/testnotify/email
+- developerId=26, userId=52, pm=efagenevalentine@gmail.com, notificationUrl=https://api.qshelter.ng/testnotify/email
 - Manual: check inbox efagenevalentine@gmail.com for company registration template.
 
 _This file is overwritten on each test run. Every scenario report includes a milestone flow chart._

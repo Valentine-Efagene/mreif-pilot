@@ -1,6 +1,6 @@
 # MOFI Platform API — AWS CDK
 
-Deploys MOFI Platform API on ECS Fargate (eight containers per task), ALB, ECR, RDS, Amazon MQ, S3, Secrets Manager, and CloudWatch logs.
+Deploys MOFI Platform API on ECS Fargate (eight containers per task), ALB, ECR, RDS, ElastiCache Valkey, S3, Secrets Manager, and CloudWatch logs.
 
 ## Prerequisites
 
@@ -33,7 +33,8 @@ Data plane (created by the stack):
 Populate secrets:
 
 - `mofi-platform-api/{stage}/app` — JWT (`JWT_SECRET` generated on create)
-- `mofi-platform-api/{stage}/rabbitmq` — Amazon MQ password (username `mofi`)
+- `mofi-platform-api/{stage}/valkey` — ElastiCache Valkey AUTH token
+- Optional Grafana OTLP: add `OTEL_EXPORTER_OTLP_HEADERS` to the app secret and deploy with `-c grafanaOtlpEndpoint=https://…/otlp` (see [docs/observability.md](../../docs/observability.md))
 
 Deploy:
 

@@ -1,61 +1,55 @@
 # System tests (e2e)
 
-End-to-end flows against a real domain process or the full platform URL. Each scenario lives in its own folder:
+End-to-end flows against the **kind multicontainer platform** (`mofi-test` namespace), not in-process Nest shortcuts.
 
 | File | Purpose |
 |------|---------|
-| `OBJECTIVE.md` | What the flow validates, stubs, and **expected milestone flow chart** |
-| `REPORT.md` | Last run: **milestone flow chart**, checklist table, and per-step status (updated each run) |
+| `OBJECTIVE.md` | What the flow validates and **expected milestone flow chart** |
+| `REPORT.md` | Last run: milestone flow chart, checklist, step status |
 | `*.spec.ts` | Executable scenario |
-
-Every `REPORT.md` includes a Mermaid **milestone flow** so failures show exactly which step stopped the run.
 
 ## Prerequisites
 
-**In-process (default when enabled):**
+- kind cluster **`mofi`** with Helm releases **dev + test** (`npm run k8s:test:setup` or `npm run test:system:up`)
+- `kubectl` configured for that cluster
+- Host ports from `infra/k8s/kind/cluster.yaml` (test edge **:18082**, MySQL **:13308**, Valkey **:16380**)
+
+## Commands
 
 ```bash
-npm run test:system:deps   # MySQL :3308 + RabbitMQ :5673 (+ optional Mailpit :8025)
+# First time (or after cluster teardown)
+npm run test:system:up
+
+# Confirm test edge is healthy
+npm run test:system:deps
+
+# Run scenarios (HTTP → edge :18082, worker in platform pod, Valkey/MySQL in mofi-test)
+unset NODE_OPTIONS
 SYSTEM_TESTS_ENABLED=true npm run test:system
 ```
 
-Uses `AUTH_ENFORCEMENT=gateway`, RabbitMQ (`mofi.notifications.commands`), and in-process **developer API + worker**.
+Default API base: `http://localhost:18082` (`MOFI_PLATFORM_API_URL` to override).
 
-Rabbit management UI (local test compose): http://localhost:15673 (`mofi` / `mofi`, vhost `mofi`)
+Valkey (test): `localhost:16380` (in-cluster service `redis:6379`).
 
-## Notifications (in-process)
+## Notifications
 
-The worker always POSTs to the Qshelter **testnotify** endpoint (default `https://api.qshelter.ng/testnotify/email`; override with `NOTIFICATION_URL`).
+Worker in the **platform pod** POSTs to Qshelter **testnotify** (`NOTIFICATION_URL` / Helm `notificationUrl`).
 
 | Check | Automated | Manual |
 |-------|-----------|--------|
 | RMQ consumption on `mofi.notifications.commands` | ✓ | — |
 | Email in inbox | — | ✓ (default PM/developer: `efagenevalentine@gmail.com`) |
 
-Optional overrides:
+Optional env:
 
-- `SYSTEM_TEST_DEVELOPER_EMAIL` / `SYSTEM_TEST_PM_EMAIL` — recipients used in stub user registration
-- `SYSTEM_TEST_NOTIFICATION_AUTH` — Bearer token if testnotify requires auth
+- `SYSTEM_TEST_DEVELOPER_EMAIL` / `SYSTEM_TEST_PM_EMAIL`
+- `SYSTEM_TEST_NOTIFICATION_AUTH`
 
-```bash
-npm run test:system:deps
-export SYSTEM_TESTS_ENABLED=true
-npm run test:system
-```
+## Legacy in-process mode
 
-## HTTP (optional)
-
-```bash
-export MOFI_PLATFORM_API_URL=http://localhost:8080
-export SYSTEM_TESTS_ENABLED=true
-npm run test:system
-```
-
-## Commands
-
-- `npm run test:system` — all scenarios under `system-tests/`
-- `npm run test:system -- developer-onboarding-flow` — single folder
+Only for debugging: `SYSTEM_TEST_IN_PROCESS=true` boots developer + worker inside Jest (not Fargate parity). Do not use for CI.
 
 ## Scenarios
 
-- [`developer-onboarding-flow/`](developer-onboarding-flow/) — full developer company onboarding via `POST /developer/developers`
+- [`developer-onboarding-flow/`](developer-onboarding-flow/) — developer company onboarding via edge → developer container

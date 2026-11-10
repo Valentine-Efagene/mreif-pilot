@@ -1,21 +1,26 @@
+import { InjectQueue } from '@nestjs/bullmq';
 import {
   Injectable,
   InternalServerErrorException,
   Logger,
 } from '@nestjs/common';
-import { Inject } from '@nestjs/common';
-import { ClientProxy } from '@nestjs/microservices';
-import { firstValueFrom } from 'rxjs';
-import { VERIFIER_LAMBDA_CLIENT, buildEnvelope } from '../../messaging/src';
+import { ConfigService } from '@nestjs/config';
+import { Queue } from 'bullmq';
+import {
+  buildDefaultJobOptions,
+  buildEnvelope,
+} from '../../messaging/src';
 import type { LambdaInvokeCommand } from '../../messaging/src/message-envelope';
+import { MOFI_VERIFIER_LAMBDA_QUEUE } from '../../messaging/src/message-envelope';
 
 @Injectable()
 export class PlatformLambdaInvokeService {
   private readonly logger = new Logger(PlatformLambdaInvokeService.name);
 
   constructor(
-    @Inject(VERIFIER_LAMBDA_CLIENT)
-    private readonly verifierClient: ClientProxy,
+    private readonly config: ConfigService,
+    @InjectQueue(MOFI_VERIFIER_LAMBDA_QUEUE)
+    private readonly verifierQueue: Queue,
   ) {}
 
   async invokeFunction(functionArn: string, payload: unknown): Promise<unknown> {
@@ -23,11 +28,15 @@ export class PlatformLambdaInvokeService {
       throw new InternalServerErrorException('Lambda ARN not set');
     }
 
-    const envelope = buildEnvelope<LambdaInvokeCommand>(
+    const envelope = buildEnvelope<LambdaInvokeCommand>('lambda.invoke', {
+      functionArn,
+      payload,
+    });
+    await this.verifierQueue.add(
       'lambda.invoke',
-      { functionArn, payload },
+      envelope,
+      buildDefaultJobOptions(this.config),
     );
-    await firstValueFrom(this.verifierClient.emit('lambda.invoke', envelope));
     this.logger.debug(`Queued lambda invoke ${envelope.correlationId}`);
     return { queued: true, correlationId: envelope.correlationId };
   }

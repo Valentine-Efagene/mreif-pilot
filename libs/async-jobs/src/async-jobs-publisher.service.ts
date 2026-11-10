@@ -1,9 +1,13 @@
-import { Inject, Injectable, Logger } from '@nestjs/common';
-import { ClientProxy } from '@nestjs/microservices';
-import { firstValueFrom } from 'rxjs';
+import { getQueueToken } from '@nestjs/bullmq';
+import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { buildEnvelope } from '../../messaging/src';
-import { DOMAIN_COMMANDS_CLIENT } from '../../messaging/src/messaging.module';
+import { ModuleRef } from '@nestjs/core';
+import { Queue } from 'bullmq';
+import {
+  buildDefaultJobOptions,
+  buildEnvelope,
+  queueForDomainEvent,
+} from '../../messaging/src';
 
 @Injectable()
 export class AsyncJobsPublisher {
@@ -11,8 +15,7 @@ export class AsyncJobsPublisher {
 
   constructor(
     private readonly config: ConfigService,
-    @Inject(DOMAIN_COMMANDS_CLIENT)
-    private readonly domainCommandsClient: ClientProxy,
+    private readonly moduleRef: ModuleRef,
   ) {}
 
   async publish<T>(
@@ -25,9 +28,15 @@ export class AsyncJobsPublisher {
       ...payload,
     });
 
-    await firstValueFrom(
-      this.domainCommandsClient.emit(eventName, envelope),
-    );
+    const queueName = queueForDomainEvent(eventName);
+    const queue = this.moduleRef.get<Queue>(getQueueToken(queueName), {
+      strict: false,
+    });
+    if (!queue) {
+      throw new Error(`Bull queue not registered: ${queueName}`);
+    }
+
+    await queue.add(eventName, envelope, buildDefaultJobOptions(this.config));
     this.logger.log(`Queued ${eventName} jobId=${jobId}`);
   }
 }

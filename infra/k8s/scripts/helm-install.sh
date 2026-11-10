@@ -30,12 +30,31 @@ install_release() {
 
   namespace="$(grep '^namespace:' "$values_file" | awk '{print $2}')"
 
-  echo "▶ helm upgrade --install $release (namespace: $namespace)"
-  helm upgrade --install "$release" "$CHART_DIR" \
-    -f "$CHART_DIR/values.yaml" \
-    -f "$values_file" \
-    --namespace "$namespace" \
+  local helm_args=(
+    upgrade --install "$release" "$CHART_DIR"
+    -f "$CHART_DIR/values.yaml"
+    -f "$values_file"
+    --namespace "$namespace"
     --create-namespace
+  )
+
+  local otel_local="$CHART_DIR/values-otel.local.yaml"
+  if [[ -f "$otel_local" ]]; then
+    echo "▶ Merging values-otel.local.yaml (Grafana OTLP auth)"
+    helm_args+=( -f "$otel_local" )
+    if [[ -z "${OTEL_EXPORTER_OTLP_HEADERS:-}" ]]; then
+      export OTEL_EXPORTER_OTLP_HEADERS="$(
+        grep 'otlpHeaders:' "$otel_local" | sed 's/.*otlpHeaders: //' | tr -d '"'
+      )" || true
+    fi
+  fi
+
+  if [[ -n "${OTEL_EXPORTER_OTLP_HEADERS:-}" && ! -f "$otel_local" ]]; then
+    helm_args+=( --set "observability.otlpHeaders=${OTEL_EXPORTER_OTLP_HEADERS}" )
+  fi
+
+  echo "▶ helm ${helm_args[*]}"
+  helm "${helm_args[@]}"
 
   echo "▶ Waiting for MySQL in $namespace"
   kubectl wait --for=condition=ready pod/mysql-0 -n "$namespace" --timeout=8m

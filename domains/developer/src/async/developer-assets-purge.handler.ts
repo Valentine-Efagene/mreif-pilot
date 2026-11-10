@@ -46,7 +46,7 @@ export class DeveloperAssetsPurgeHandler {
     if (!developer) {
       const message = `Developer ${developerId} not found`;
       await this.asyncJobs.fail(jobId, message);
-      this.logger.warn(`${message} (jobId=${jobId}); acking RMQ message`);
+      this.logger.warn(`${message} (jobId=${jobId}); completing queue job`);
       return;
     }
 

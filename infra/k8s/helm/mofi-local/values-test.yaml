@@ -1,5 +1,8 @@
 namespace: mofi-test
 
+observability:
+  enabled: false
+
 mysql:
   database: mofi_platform_test
   rootPassword: mofi_test_root
@@ -13,10 +16,6 @@ minio:
   bucket: mofi-test
   apiNodePort: 30902
   consoleNodePort: 30903
-
-rabbitmq:
-  amqpNodePort: 30568
-  mgmtNodePort: 31568
 
 platform:
   nodePort: 30081

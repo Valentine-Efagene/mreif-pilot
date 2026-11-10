@@ -1,14 +1,15 @@
-import { Controller, Logger } from '@nestjs/common';
-import { EventPattern, Payload } from '@nestjs/microservices';
+import { Processor, WorkerHost } from '@nestjs/bullmq';
+import { Logger } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
+import { Job } from 'bullmq';
 import { firstValueFrom } from 'rxjs';
 import { AxiosError } from 'axios';
 import type {
   HttpNotificationCommand,
   MessageEnvelope,
 } from '../../messaging/src/message-envelope';
+import { MOFI_NOTIFICATIONS_QUEUE } from '../../messaging/src/message-envelope';
 
-/** Permanent client errors should not consume delivery-limit retries. */
 function isNonRetryableNotificationHttpStatus(status?: number): boolean {
   return (
     status !== undefined &&
@@ -19,16 +20,16 @@ function isNonRetryableNotificationHttpStatus(status?: number): boolean {
   );
 }
 
-@Controller()
-export class NotificationQueueController {
-  private readonly logger = new Logger(NotificationQueueController.name);
+@Processor(MOFI_NOTIFICATIONS_QUEUE)
+export class NotificationQueueProcessor extends WorkerHost {
+  private readonly logger = new Logger(NotificationQueueProcessor.name);
 
-  constructor(private readonly httpService: HttpService) {}
+  constructor(private readonly httpService: HttpService) {
+    super();
+  }
 
-  @EventPattern('http.notification')
-  async handleHttpNotification(
-    @Payload() envelope: MessageEnvelope<HttpNotificationCommand>,
-  ): Promise<void> {
+  async process(job: Job<MessageEnvelope<HttpNotificationCommand>>): Promise<void> {
+    const envelope = job.data;
     const { url, body } = envelope.payload;
     const headers: Record<string, string> = {};
     if (envelope.authContext?.authorizationHeader) {
@@ -55,7 +56,7 @@ export class NotificationQueueController {
           : JSON.stringify(error.response?.data ?? '').slice(0, 200);
       if (isNonRetryableNotificationHttpStatus(status)) {
         this.logger.error(
-          `Notification non-retryable (acked) ${envelope.correlationId}: status=${status} body=${bodyPreview}`,
+          `Notification non-retryable (completed) ${envelope.correlationId}: status=${status} body=${bodyPreview}`,
         );
         return;
       }

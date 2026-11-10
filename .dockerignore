@@ -1,0 +1,16 @@
+# Build context: mofi-platform-api repo root (see docker/Dockerfile).
+node_modules
+dist
+.git
+.env
+.env.*
+!.env.example
+coverage
+*.log
+infra/aws/.cdk-out*
+infra/aws/node_modules
+infra/aws/cdk.out
+system-tests
+contract-tests
+**/*.spec.ts
+**/__tests__

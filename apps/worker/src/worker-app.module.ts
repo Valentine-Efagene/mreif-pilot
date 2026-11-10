@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { PlatformNotificationsModule } from '../../../libs/notifications/src/notifications.module';
+import { PlatformWorkerQueuesModule } from '../../../libs/notifications/src/platform-worker-queues.module';
 import { WorkerHealthController } from './worker-health.controller';
 
 /**
@@ -14,6 +15,7 @@ import { WorkerHealthController } from './worker-health.controller';
       envFilePath: process.env.NODE_ENV === 'production' ? undefined : '.env',
     }),
     PlatformNotificationsModule,
+    PlatformWorkerQueuesModule.forWorker(),
   ],
   controllers: [WorkerHealthController],
 })

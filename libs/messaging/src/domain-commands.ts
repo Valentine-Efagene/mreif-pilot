@@ -1,19 +1,13 @@
-/** Topic exchange for dotted routing keys (`developer.assets.purge`, …). */
-export const MOFI_DOMAIN_COMMANDS_EXCHANGE = 'mofi.domain.commands';
-
-/**
- * @deprecated Legacy single-queue name; use {@link domainCommandsQueueName} per domain.
- */
-export const MOFI_DOMAIN_COMMANDS_QUEUE = MOFI_DOMAIN_COMMANDS_EXCHANGE;
-
+/** Per-domain Bull queue for dotted domain event names (`developer.assets.purge`, …). */
 export function domainCommandsQueueName(domain: string): string {
   return `mofi.${domain}.commands`;
 }
 
-/** Nest RMQ `routingKey` binding for a domain consumer (`developer.#`, …). */
-export function domainCommandsBindingKey(domain: string): string {
-  return `${domain}.#`;
-}
+/** @deprecated Use {@link domainCommandsQueueName}; kept for compatibility with older docs. */
+export const MOFI_DOMAIN_COMMANDS_EXCHANGE = 'mofi.domain.commands';
+
+/** @deprecated Legacy single-queue name; use {@link domainCommandsQueueName} per domain. */
+export const MOFI_DOMAIN_COMMANDS_QUEUE = MOFI_DOMAIN_COMMANDS_EXCHANGE;
 
 /** Container roles (`MOFI_CONTAINER_ROLE`) that host domain-command consumers. */
 export const DOMAIN_COMMAND_CONSUMER_ROLES = ['developer'] as const;

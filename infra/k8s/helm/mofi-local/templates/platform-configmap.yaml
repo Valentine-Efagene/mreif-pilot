@@ -14,6 +14,7 @@ data:
   DB_PORT: "3306"
   DB_USERNAME: root
   DB_NAME: {{ .Values.mysql.database | quote }}
+  REDIS_HOST: {{ include "mofi-local.redisHost" . | quote }}
   REDIS_PORT: "6379"
   CUSTOM_AWS_S3_BUCKET_NAME: {{ .Values.minio.bucket | quote }}
   CUSTOM_AWS_ACCESS_KEY_ID: {{ .Values.minio.rootUser | quote }}
@@ -22,9 +23,8 @@ data:
   CUSTOM_AWS_FORCE_PATH_STYLE: "true"
   PRESIGNED_URL_TTL: "3600"
   NOTIFICATION_URL: {{ .Values.platform.notificationUrl | quote }}
-  AMQP_HOST: {{ include "mofi-local.rabbitmqHost" . | quote }}
-  AMQP_PORT: "5672"
-  AMQP_USERNAME: {{ .Values.rabbitmq.username | quote }}
-  AMQP_VHOST: {{ .Values.rabbitmq.vhost | quote }}
-  AMQP_URL: amqp://{{ .Values.rabbitmq.username }}:{{ .Values.rabbitmq.password }}@{{ include "mofi-local.rabbitmqHost" . }}:5672/{{ .Values.rabbitmq.vhost }}
+  {{- if and .Values.observability .Values.observability.enabled }}
+  OTEL_EXPORTER_OTLP_ENDPOINT: {{ .Values.observability.otlpEndpoint | quote }}
+  OTEL_EXPORTER_OTLP_PROTOCOL: http/protobuf
+  {{- end }}
 {{- end }}

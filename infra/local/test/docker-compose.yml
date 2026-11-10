@@ -19,8 +19,8 @@ services:
       retries: 20
 
   redis:
-    image: redis:7-alpine
-    container_name: mofi-test-redis
+    image: valkey/valkey:8-alpine
+    container_name: mofi-test-valkey
     restart: unless-stopped
     ports:
       - "6380:6379"
@@ -50,40 +50,6 @@ services:
       timeout: 5s
       retries: 10
       start_period: 10s
-
-  mailpit:
-    image: axllent/mailpit:latest
-    container_name: mofi-test-mailpit
-    restart: unless-stopped
-    ports:
-      - "8025:8025"
-      - "1025:1025"
-    healthcheck:
-      test: ["CMD", "wget", "-q", "-O-", "http://127.0.0.1:8025/api/v1/info"]
-      interval: 5s
-      timeout: 5s
-      retries: 10
-
-  rabbitmq:
-    image: rabbitmq:3.13-management
-    container_name: mofi-test-rabbitmq
-    hostname: mofi-test-rabbitmq
-    restart: unless-stopped
-    environment:
-      RABBITMQ_DEFAULT_USER: mofi
-      RABBITMQ_DEFAULT_PASS: mofi
-      RABBITMQ_DEFAULT_VHOST: mofi
-      # Must be 20+ alphanumeric chars; empty host ERLANG_COOKIE breaks startup.
-      RABBITMQ_ERLANG_COOKIE: MofiPlatformTestRabbitErlangCookie
-    ports:
-      - "5673:5672"
-      - "15673:15672"
-    healthcheck:
-      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
-      interval: 5s
-      timeout: 5s
-      retries: 15
-      start_period: 15s
 
   minio-init:
     image: minio/mc:latest

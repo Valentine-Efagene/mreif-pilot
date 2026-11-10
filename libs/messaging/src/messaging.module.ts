@@ -1,55 +1,41 @@
+import { BullModule } from '@nestjs/bullmq';
 import { Global, Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { ClientsModule, Transport } from '@nestjs/microservices';
+import { DOMAIN_COMMAND_CONSUMER_ROLES } from './domain-commands';
+import { domainCommandsQueueName } from './domain-commands';
 import {
   MOFI_NOTIFICATIONS_QUEUE,
   MOFI_VERIFIER_LAMBDA_QUEUE,
 } from './message-envelope';
 import {
-  buildDomainCommandsProducerOptions,
-  buildRmqClientOptions,
-  getAmqpUrls,
-} from './rmq-config';
+  getValkeyConnectionOptions,
+  MOFI_BULL_KEY_PREFIX,
+} from './valkey-config';
 
-export const NOTIFICATIONS_CLIENT = 'NOTIFICATIONS_CLIENT';
-export const VERIFIER_LAMBDA_CLIENT = 'VERIFIER_LAMBDA_CLIENT';
-export const DOMAIN_COMMANDS_CLIENT = 'DOMAIN_COMMANDS_CLIENT';
+const producerQueueNames = [
+  MOFI_NOTIFICATIONS_QUEUE,
+  MOFI_VERIFIER_LAMBDA_QUEUE,
+  ...DOMAIN_COMMAND_CONSUMER_ROLES.map((domain) =>
+    domainCommandsQueueName(domain),
+  ),
+];
 
 @Global()
 @Module({
   imports: [
     ConfigModule,
-    ClientsModule.registerAsync([
-      {
-        name: NOTIFICATIONS_CLIENT,
-        imports: [ConfigModule],
-        inject: [ConfigService],
-        useFactory: (config: ConfigService) => ({
-          transport: Transport.RMQ,
-          options: buildRmqClientOptions(config, MOFI_NOTIFICATIONS_QUEUE),
-        }),
-      },
-      {
-        name: VERIFIER_LAMBDA_CLIENT,
-        imports: [ConfigModule],
-        inject: [ConfigService],
-        useFactory: (config: ConfigService) => ({
-          transport: Transport.RMQ,
-          options: buildRmqClientOptions(config, MOFI_VERIFIER_LAMBDA_QUEUE),
-        }),
-      },
-      {
-        name: DOMAIN_COMMANDS_CLIENT,
-        imports: [ConfigModule],
-        inject: [ConfigService],
-        useFactory: (config: ConfigService) => ({
-          transport: Transport.RMQ,
-          options: buildDomainCommandsProducerOptions(config),
-        }),
-      },
-    ]),
+    BullModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (config: ConfigService) => ({
+        connection: getValkeyConnectionOptions(config),
+        prefix: MOFI_BULL_KEY_PREFIX,
+      }),
+    }),
+    BullModule.registerQueue(
+      ...producerQueueNames.map((name) => ({ name })),
+    ),
   ],
-  exports: [ClientsModule],
+  exports: [BullModule],
 })
 export class MofiMessagingModule {}
-

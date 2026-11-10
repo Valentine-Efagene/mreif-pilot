@@ -5,7 +5,6 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 K8S_DIR="$(dirname "$SCRIPT_DIR")"
 REPO_ROOT="$(cd "$K8S_DIR/../.." && pwd)"
-MREIF_ROOT="$(cd "$REPO_ROOT/.." && pwd)"
 CLUSTER_NAME="${K8S_CLUSTER_NAME:-mofi}"
 IMAGE="${MOFI_PLATFORM_IMAGE:-mofi-platform-api:local}"
 
@@ -19,18 +18,13 @@ require_cmd() {
 require_cmd docker
 require_cmd kind
 
-if [[ ! -d "$MREIF_ROOT/qshelter-auth" ]]; then
-  echo "Expected qshelter-auth at $MREIF_ROOT/qshelter-auth (for @qshelter/nest-auth)" >&2
-  exit 1
-fi
-
 if [[ ! -f "$REPO_ROOT/docker/Dockerfile" ]]; then
   echo "Missing Dockerfile at $REPO_ROOT/docker/Dockerfile" >&2
   exit 1
 fi
 
-echo "▶ Building $IMAGE (context: $MREIF_ROOT)"
-docker build -f "$REPO_ROOT/docker/Dockerfile" -t "$IMAGE" "$MREIF_ROOT"
+echo "▶ Building $IMAGE (context: $REPO_ROOT)"
+docker build -f "$REPO_ROOT/docker/Dockerfile" -t "$IMAGE" "$REPO_ROOT"
 
 if kind get clusters 2>/dev/null | grep -qx "$CLUSTER_NAME"; then
   echo "▶ Loading image into kind cluster '$CLUSTER_NAME'"

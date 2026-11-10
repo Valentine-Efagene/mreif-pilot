@@ -1,5 +1,11 @@
 namespace: mofi-dev
 
+# OpenTelemetry → Grafana Cloud (enabled for local k8s; token via env or values-otel.local.yaml)
+observability:
+  enabled: true
+  otlpEndpoint: https://otlp-gateway-prod-eu-central-0.grafana.net/otlp
+  otlpHeaders: ""
+
 mysql:
   image: mysql:8.0
   database: qshelter-dev
@@ -8,7 +14,7 @@ mysql:
   storage: 2Gi
 
 redis:
-  image: redis:7-alpine
+  image: valkey/valkey:8-alpine
   nodePort: 30637
 
 minio:
@@ -19,14 +25,6 @@ minio:
   bucket: mofi-local
   apiNodePort: 30900
   consoleNodePort: 30901
-
-rabbitmq:
-  image: rabbitmq:3.13-management-alpine
-  username: mofi
-  password: mofi
-  vhost: mofi
-  amqpNodePort: 30567
-  mgmtNodePort: 31567
 
 platform:
   enabled: true

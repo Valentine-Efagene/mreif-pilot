@@ -32,10 +32,10 @@ Validate that a newly registered user can complete **developer company onboardin
 
 ## Execution modes
 
-- **in-process** — `DeveloperAppModule` + `WorkerAppModule` + MySQL `:3308` + Rabbit `:5673`; asserts **RMQ consumption** on `mofi.notifications.commands`; manual inbox check noted in `REPORT.md`.
-- **http** — `MOFI_PLATFORM_API_URL` pointing at edge; notification milestones skipped unless full platform worker + Rabbit are running.
+- **http (default)** — kind **`mofi-test`** platform pod (edge + domains + worker), `MOFI_PLATFORM_API_URL=http://localhost:18082`; MySQL/Rabbit on test host ports (`kind/cluster.yaml`); asserts **RMQ consumption** on `mofi.notifications.commands`; manual inbox check in `REPORT.md`.
+- **in-process (debug only)** — `SYSTEM_TEST_IN_PROCESS=true`; not Fargate/k8s parity.
 
-Enable with `SYSTEM_TESTS_ENABLED=true` or set `MOFI_PLATFORM_API_URL`.
+Enable with `SYSTEM_TESTS_ENABLED=true` after `npm run test:system:up`.
 
 ## Milestone flow (expected)
 

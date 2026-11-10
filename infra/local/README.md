@@ -24,7 +24,7 @@ The compose files under `dev/` and `test/` remain for reference only. Prefer `np
 | MySQL | 3307 |
 | Redis | 6379 |
 | MinIO API / console | 9000 / 9001 |
-| RabbitMQ AMQP / UI | 5672 / 15672 |
+| Valkey | 6379 |
 
 ## Monolith on the host
 

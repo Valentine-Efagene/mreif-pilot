@@ -1,6 +1,6 @@
 # MOFI — Local Kubernetes (kind)
 
-Single local path for **Fargate multicontainer parity**: one Pod with **edge + six domain runtimes + worker**, plus MySQL, Redis, MinIO, and RabbitMQ in-cluster.
+Single local path for **Fargate multicontainer parity**: one Pod with **edge + six domain runtimes + worker**, plus MySQL, Valkey, and MinIO in-cluster.
 
 Production remains **ECS on Fargate** — this stack is for local dev and contract tests only.
 
@@ -10,8 +10,6 @@ Production remains **ECS on Fargate** — this stack is for local dev and contra
 - [kind](https://kind.sigs.k8s.io/)
 - [kubectl](https://kubernetes.io/docs/tasks/tools/)
 - [Helm 3](https://helm.sh/)
-- Sibling repo **`../qshelter-auth`** (from `mreif/`) for the platform image build
-
 ```bash
 brew install kind kubectl helm
 ```
@@ -27,8 +25,8 @@ npm run k8s:setup
 **Smoke check:**
 
 ```bash
-curl http://localhost:8080/health
-curl http://localhost:8080/agent/health
+curl http://localhost:18080/health
+curl http://localhost:18080/agent/health
 ```
 
 ## npm scripts
@@ -45,13 +43,15 @@ curl http://localhost:8080/agent/health
 
 | Service | Host port |
 | ------- | --------- |
-| Platform API (edge) | 8080 |
-| MySQL | 3307 |
-| Redis | 6379 |
-| MinIO API / console | 9000 / 9001 |
-| RabbitMQ AMQP / UI | 5672 / 15672 |
+| Platform API (edge) | 18080 |
+| MySQL | 13307 |
+| Redis | 16379 |
+| MinIO API / console | 19000 / 19001 |
+| Valkey | 16379 / 16380 (dev / test) |
 
-Test namespace (`mofi-test`) uses **8082**, **3308**, **6380**, **9100/9101**, **5673/15673** when installed via `k8s:test:setup`.
+Test namespace (`mofi-test`) uses **18082**, **13308**, **16380**, **19100/19101**, **25673/21673** (host ports; see `kind/cluster.yaml`).
+
+These ports avoid the default **`qshelter`** kind mappings on 8080, 9000, 6380, etc.
 
 ## Layout
 
@@ -76,11 +76,11 @@ Host `npm run start:dev` runs the **edge** process only; for full multicontainer
 After `k8s:setup`:
 
 ```bash
-curl -s http://localhost:8080/health
-curl -s http://localhost:8080/agent/health
+curl -s http://localhost:18080/health
+curl -s http://localhost:18080/agent/health
 npm run test:contract
 # Optional live HTTP contract probes:
-# MOFI_PLATFORM_API_URL=http://127.0.0.1:8080 npm run test:contract
+# MOFI_PLATFORM_API_URL=http://127.0.0.1:18080 npm run test:contract
 ```
 
 Rebuild and restart platform after code changes:

@@ -19,8 +19,8 @@ services:
       retries: 20
 
   redis:
-    image: redis:7-alpine
-    container_name: mofi-dev-redis
+    image: valkey/valkey:8-alpine
+    container_name: mofi-dev-valkey
     restart: unless-stopped
     ports:
       - "6379:6379"
@@ -50,25 +50,6 @@ services:
       timeout: 5s
       retries: 10
       start_period: 10s
-
-  rabbitmq:
-    image: rabbitmq:3.13-management-alpine
-    container_name: mofi-dev-rabbitmq
-    restart: unless-stopped
-    environment:
-      RABBITMQ_DEFAULT_USER: mofi
-      RABBITMQ_DEFAULT_PASS: mofi
-      RABBITMQ_DEFAULT_VHOST: mofi
-      RABBITMQ_ERLANG_COOKIE: mofi_dev_rabbit_cookie
-    ports:
-      - "5672:5672"
-      - "15672:15672"
-    healthcheck:
-      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
-      interval: 5s
-      timeout: 5s
-      retries: 15
-      start_period: 15s
 
   minio-init:
     image: minio/mc:latest

@@ -25,6 +25,3 @@ redis
 minio
 {{- end -}}
 
-{{- define "mofi-local.rabbitmqHost" -}}
-rabbitmq
-{{- end -}}

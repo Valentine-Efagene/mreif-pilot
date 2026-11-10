@@ -29,7 +29,6 @@ spec:
               set -e
               until nc -z mysql 3306; do echo waiting mysql; sleep 2; done
               until nc -z redis 6379; do echo waiting redis; sleep 2; done
-              until nc -z rabbitmq 5672; do echo waiting rabbitmq; sleep 2; done
               until wget -q -O- http://minio:9000/minio/health/live; do echo waiting minio; sleep 2; done
       containers:
         {{- range .Values.platform.roles }}
@@ -72,11 +71,15 @@ spec:
                 secretKeyRef:
                   name: mofi-secrets
                   key: MINIO_ROOT_PASSWORD
-            - name: AMQP_PASSWORD
+            {{- if and .Values.observability .Values.observability.enabled }}
+            {{- if .Values.observability.otlpHeaders }}
+            - name: OTEL_EXPORTER_OTLP_HEADERS
               valueFrom:
                 secretKeyRef:
                   name: mofi-secrets
-                  key: AMQP_PASSWORD
+                  key: OTEL_EXPORTER_OTLP_HEADERS
+            {{- end }}
+            {{- end }}
             {{- if eq .mofiRole "edge" }}
             - name: AGENT_UPSTREAM
               value: "http://127.0.0.1:3001"

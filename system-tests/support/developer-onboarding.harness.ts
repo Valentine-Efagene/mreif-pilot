@@ -1,7 +1,5 @@
 import { INestApplication, ValidationPipe } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
-import { connectMofiMicroservices } from '../../apps/_shared/connect-microservices';
 import {
   DeveloperOnboardingStageName,
   ModeOfBusinessRegistration,
@@ -14,7 +12,7 @@ import {
   StubRegisteredUser,
 } from './stubs/external-registration.stub';
 import { createLambdaInvokeStub } from './stubs/lambda-invoke.stub';
-import { applyAmqpTestEnv } from './messaging-test-env';
+import { applyValkeyTestEnv } from './messaging-test-env';
 import {
   resolveNotificationBaseUrl,
   systemTestProjectManagerEmail,
@@ -26,7 +24,7 @@ import {
   recreateMofiWorkQueuesForTests,
   QueueSnapshot,
   waitForNotificationQueueConsumed,
-} from './rabbitmq-test-helpers';
+} from './valkey-bull-test-helpers';
 import { StepResult } from './report-writer';
 import { httpTestClient } from './http-test-client';
 import { systemTestAuthHeaders } from './system-test-auth';
@@ -64,13 +62,13 @@ function applyInProcessTestEnv(): void {
     delete process.env[key];
   }
   process.env.AUTH_ENFORCEMENT = 'gateway';
-  applyAmqpTestEnv();
+  applyValkeyTestEnv();
   process.env.admin_dashboard_url = 'https://admin.stub.mofi';
   process.env.app = process.env.app ?? 'mofi';
   process.env.MOFI_CONTAINER_ROLE = 'developer';
   process.env.MOFI_RUNTIME = 'domain';
   process.env.DB_HOST = process.env.SYSTEM_TEST_DB_HOST ?? '127.0.0.1';
-  process.env.DB_PORT = process.env.SYSTEM_TEST_DB_PORT ?? '3308';
+  process.env.DB_PORT = process.env.SYSTEM_TEST_DB_PORT ?? '13308';
   process.env.DB_NAME = process.env.SYSTEM_TEST_DB_NAME ?? 'mofi_platform_test';
   process.env.DB_USERNAME = process.env.SYSTEM_TEST_DB_USERNAME ?? 'root';
   process.env.DB_PASSWORD =
@@ -122,12 +120,10 @@ export async function bootInProcessDeveloperApp(): Promise<DeveloperAppBoot> {
     .compile();
 
   cancelNotificationsQueueConsumers();
-  recreateMofiWorkQueuesForTests();
+  await recreateMofiWorkQueuesForTests();
 
   const workerApp = workerFixture.createNestApplication();
   await workerApp.init();
-  const workerConfig = workerApp.get(ConfigService);
-  await connectMofiMicroservices(workerApp, workerConfig);
 
   await purgeNotificationsQueue();
   const queueBaseline = await fetchNotificationQueueSnapshot();
@@ -415,17 +411,17 @@ export async function runDeveloperOnboardingFlow(
       notificationCtx.queueBaseline,
       expected,
     );
-    const deliverDelta =
-      final.deliverGetTotal - notificationCtx.queueBaseline.deliverGetTotal;
-    const pending = final.messages_ready + final.messages_unacknowledged;
-  const queueNote =
+    const completedDelta =
+      final.completed - notificationCtx.queueBaseline.completed;
+    const pending = final.waiting + final.active;
+    const queueNote =
       pending > 0
-        ? ` (queue still has ${pending} message(s)—purge rabbit or restart compose if emails never arrive)`
+        ? ` (queue still has ${pending} job(s)—purge Valkey keys or restart compose if emails never arrive)`
         : '';
     steps.push({
-      name: 'Company registration notification (RMQ consumed → testnotify)',
+      name: 'Company registration notification (Bull consumed → testnotify)',
       status: 'passed',
-      detail: `mofi.notifications.commands deliverDelta=${deliverDelta}, ready=${final.messages_ready}, unacked=${final.messages_unacknowledged}${queueNote}`,
+      detail: `mofi.notifications.commands completedDelta=${completedDelta}, waiting=${final.waiting}, active=${final.active}${queueNote}`,
     });
     const inbox = systemTestProjectManagerEmail();
     manualInboxNote = `Manual: check inbox ${inbox} for company registration template.`;
@@ -436,9 +432,9 @@ export async function runDeveloperOnboardingFlow(
     });
   } else {
     steps.push({
-      name: 'Company registration notification (RMQ → worker → testnotify)',
+      name: 'Company registration notification (Bull → worker → testnotify)',
       status: 'skipped',
-      detail: 'HTTP platform mode without in-process worker/Rabbit',
+      detail: 'HTTP platform mode without in-process worker/Valkey',
     });
   }
 

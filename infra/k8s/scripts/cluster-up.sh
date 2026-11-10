@@ -39,12 +39,12 @@ echo ""
 echo "✅ MOFI local Kubernetes stack is up"
 echo ""
 if [[ "$PROFILE" == "dev" || "$PROFILE" == "all" ]]; then
-  echo "  Dev API:      http://localhost:8080/health"
-  echo "  Dev MySQL:    localhost:3307"
-  echo "  Dev MinIO:    http://localhost:9001 (minioadmin / minioadmin)"
-  echo "  RabbitMQ UI:  http://localhost:15672 (mofi / mofi)"
+  echo "  Dev API:      http://localhost:18080/health"
+  echo "  Dev MySQL:    localhost:13307"
+  echo "  Dev MinIO:    http://localhost:19001 (minioadmin / minioadmin)"
+  echo "  Dev Valkey:   localhost:16379"
 fi
 if [[ "$PROFILE" == "test" || "$PROFILE" == "all" ]]; then
-  echo "  Test API:     http://localhost:8082/health"
+  echo "  Test API:     http://localhost:18082/health"
 fi
 echo ""
